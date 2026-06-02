@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  fullName     String   @map("full_name")
+  email        String   @unique
+  password     String
+  photoProfile String?  @map("photo_profile")
+  bio          String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  // Relasi Many-to-Many mandiri untuk Follower & Following
+  followers    Follow[] @relation("UserFollowers")
+  following    Follow[] @relation("UserFollowing")
+  // Relasi ke Threads (sebagai pencipta dan peng-update)
+  createdThreads Thread[] @relation("ThreadCreator")
+  updatedThreads Thread[] @relation("ThreadUpdater")
+  // Relasi ke Likes
+  likes          Like[]   @relation("UserLikes") // Relasi utama pencatat like
+  createdLikes   Like[]   @relation("LikeCreator")
+  updatedLikes   Like[]   @relation("LikeUpdater")
+  // Relasi ke Replies
+  replies        Reply[]  @relation("UserReplies") // Relasi utama pencatat reply
+  createdReplies Reply[]  @relation("ReplyCreator")
+  updatedReplies Reply[]  @relation("ReplyUpdater")
+  @@map("users")
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int      @map("follower_id")
+  followingId Int      @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  // Relasi ke User
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  // Mencegah duplikasi follow
+  @@unique([followerId, followingId])
+  @@map("following")
+}
+
+model Thread {
+  id              Int      @id @default(autoincrement())
+  content         String
+  image           String?
+  numberOfReplies Int?     @map("number_of_replies") // Dibuat opsional (Int?)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  // Relasi pembuat Thread (created_by wajib ada, updated_by opsional)
+  createdById     Int      @map("created_by")
+  updatedById     Int?     @map("updated_by")
+  creator         User     @relation("ThreadCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  updater         User?    @relation("ThreadUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  
+  // Relasi ke tabel anak
+  likes           Like[]
+  replies         Reply[]
+  @@map("threads")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  threadId  Int      @map("thread_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  // Kolom opsional tambahan untuk created_by dan updated_by
+  createdById Int?     @map("created_by")
+  updatedById Int?     @map("updated_by")
+  // Relasi utama
+  user      User     @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  // Relasi opsional tambahan
+  creator   User?    @relation("LikeCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updater   User?    @relation("LikeUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  // Mencegah duplikasi like pada thread yang sama
+  @@unique([userId, threadId])
+  @@map("likes")
+}
+
+model Reply {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  threadId  Int      @map("thread_id")
+  content   String
+  image     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  // Kolom opsional tambahan untuk created_by dan updated_by
+  createdById Int?     @map("created_by")
+  updatedById Int?     @map("updated_by")
+  // Relasi utama
+  user      User     @relation("UserReplies", fields: [userId], references: [id], onDelete: Cascade)
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  // Relasi opsional tambahan
+  creator   User?    @relation("ReplyCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updater   User?    @relation("ReplyUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  @@map("replies")
+}
