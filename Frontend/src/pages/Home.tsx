@@ -29,9 +29,9 @@ const Home = () => {
     const fetchThreads = async () => {
       try {
         const response = await api.get("/threads");
-        // Sesuai format respons backend kita: response.data.data.threads
+        // Sesuai format respons backend response.data.data.threads
         setThreads(response.data.data.threads);
-      } catch (err: any) {
+      } catch (err) {
         setError("Gagal memuat daftar postingan.");
         console.error(err);
       } finally {
@@ -45,11 +45,14 @@ const Home = () => {
   // 2. Fungsi untuk mengirim postingan baru (POST /threads)
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // mencegah user mengisi postingan kosong dan mencegah user memosting spasi saja
     if (!newPostContent.trim()) return;
 
     setIsPosting(true);
     try {
-      const response = await api.post("/threads", { content: newPostContent });
+      const response = await api.post("/threads/create", {
+        content: newPostContent,
+      });
       const createdThread = response.data.data;
 
       // Mapping data baru agar formatnya sesuai dengan tipe data Thread di Frontend
@@ -79,8 +82,11 @@ const Home = () => {
     }
   };
 
-  // 3. Fungsi interaktif tombol Like di Frontend (untuk demo)
-  const handleLikeToggle = (threadId: number) => {
+  // 3. Fungsi interaktif tombol Like di Frontend
+  const handleLikeToggle = async (threadId: number) => {
+    // 1. Simpan salinan data threads sebelumnya untuk cadangan rollback jika gagal
+    const originalThreads = [...threads];
+    // 2. Lakukan Optimistic Update (Ubah UI secara instan)
     setThreads(
       threads.map((t) => {
         if (t.id === threadId) {
@@ -93,6 +99,15 @@ const Home = () => {
         return t;
       }),
     );
+    try {
+      // 3. Kirim request ke backend untuk menyimpan data ke database
+      await api.post(`/threads/${threadId}/like`);
+    } catch (err) {
+      console.error("Gagal menyinkronkan like ke server:", err);
+      // 4. Rollback tampilan jika API gagal
+      setThreads(originalThreads);
+      alert("Gagal memperbarui status like.");
+    }
   };
 
   const handleLogout = () => {
@@ -105,7 +120,7 @@ const Home = () => {
       <div className="mx-auto max-w-2xl bg-white rounded-xl shadow-md overflow-hidden">
         {/* Header Atas */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50">
-          {/* <div className="text-left">
+          <div className="text-left">
             <h1 className="text-xl font-bold text-gray-800">
               CircleAPP Beranda
             </h1>
@@ -115,7 +130,7 @@ const Home = () => {
                 {user.username})
               </p>
             )}
-          </div> */}
+          </div>
           <Button
             onClick={handleLogout}
             variant="destructive"

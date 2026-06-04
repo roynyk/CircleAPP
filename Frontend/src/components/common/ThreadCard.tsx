@@ -1,5 +1,5 @@
 import React from "react";
-import { Creator, Thread } from "@/types/thread";
+import { Thread } from "@/types/thread";
 import { Heart, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -37,7 +37,7 @@ const ThreadCard: React.FC<ThreadCardProps> = ({ thread, onLikeToggle }) => {
           </AvatarFallback>
         </Avatar>
 
-        {/* Konten Postian */}
+        {/* Konten Postingan */}
         <div className="flex-1">
           {/* Header Kartu (Nama, Username, Tanggal) */}
           <div className="flex items-center space-x-2">

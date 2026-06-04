@@ -99,3 +99,61 @@ export const getThreads = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const toggleLike = async (req: Request, res: Response) => {
+  try {
+    const threadId = parseInt(req.params.threadId, 10);
+    const userId = (req as any).user.id;
+    if (isNaN(threadId)) {
+      return res.status(400).json({ message: "ID Thread tidak valid" });
+    }
+
+    // 1. Periksa apakah thread yang ingin di-like memang ada
+    const thread = await prisma.thread.findUnique({
+      where: { id: threadId },
+    });
+    if (!thread) {
+      return res.status(404).json({ message: "Thread tidak ditemukan" });
+    }
+    // 2. Periksa apakah user sudah memberikan Like pada thread ini sebelumnya
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_threadId: {
+          userId: userId,
+          threadId: threadId,
+        },
+      },
+    });
+    if (existingLike) {
+      // JIKA SUDAH DI-LIKE: Hapus data Like (Dislike)
+      await prisma.like.delete({
+        where: {
+          userId_threadId: {
+            userId: userId,
+            threadId: threadId,
+          },
+        },
+      });
+      return res.status(200).json({
+        message: "Thread berhasil tidak disukai (disliked)",
+        isLiked: false,
+      });
+    } else {
+      // JIKA BELUM DI-LIKE: Tambahkan data Like ke database
+      await prisma.like.create({
+        data: {
+          userId: userId,
+          threadId: threadId,
+        },
+      });
+      return res.status(200).json({
+        message: "Thread berhasil disukai (liked)",
+        isLiked: true,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: `Gagal memperbarui status like: ${error}`,
+    });
+  }
+};
