@@ -1,12 +1,14 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import mainRoute from "./routes";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+app.use(cors());
+app.use(express.json());
+app.use("/api/v1", mainRoute);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });

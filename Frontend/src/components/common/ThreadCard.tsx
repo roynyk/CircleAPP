@@ -1,0 +1,91 @@
+import React from "react";
+import { Creator, Thread } from "@/types/thread";
+import { Heart, MessageCircle } from "lucide-react";
+import { Card, CardContent } from "../ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+
+interface ThreadCardProps {
+  thread: Thread;
+  onLikeToggle?: (threadId: number) => void;
+}
+
+// React.FC itu singkatan dari React Functional Component Ini adalah sebuah Tipe Data Bawaan dari TypeScript yang khusus digunakan untuk memberi tahu editor bahwa fungsi/variabel yang sedang kita buat ini adalah sebuah Komponen React (bukan fungsi javascript biasa).
+const ThreadCard: React.FC<ThreadCardProps> = ({ thread, onLikeToggle }) => {
+  //Mengubah tanggal yang amberadul di database menjadi Format tanggal postingan (misal: 4 Jun 2026)
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
+
+  return (
+    <Card className="border-none border-b border-gray-100 rounded-none shadow-none hover:bg-gray-50/50 transition duration-150 text-left">
+      <CardContent className="p-4 flex space-x-3">
+        {/* Avatar Profil dari shadcn/ui */}
+        <Avatar className="h-10 w-10">
+          {thread.user.profile_picture && (
+            <AvatarImage
+              src={thread.user.profile_picture}
+              alt={thread.user.username}
+            />
+          )}
+          <AvatarFallback className="bg-blue-100 text-blue-600 font-bold uppercase">
+            {thread.user.name[0]}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Konten Postian */}
+        <div className="flex-1">
+          {/* Header Kartu (Nama, Username, Tanggal) */}
+          <div className="flex items-center space-x-2">
+            <span className="font-bold text-gray-900 text-sm hover:underline cursor-pointer">
+              {thread.user.name}
+            </span>
+            <span className="text-xs text-gray-500">
+              @{thread.user.username}
+            </span>
+            <span className="text-gray-300 text-xs">•</span>
+            <span className="text-xs text-gray-500">
+              {formatDate(thread.created_at)}
+            </span>
+          </div>
+
+          {/* Isi Tulisan Postingan */}
+          <p className="mt-1.5 text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+            {thread.content}
+          </p>
+
+          {/* Tombol Interaksi (Like & Reply) */}
+          <div className="mt-3 flex items-center space-x-6 text-gray-500">
+            {/* Tombol Like dengan Conditional Rendering */}
+            <button
+              onClick={() => onLikeToggle && onLikeToggle(thread.id)}
+              className="flex items-center space-x-1.5 text-xs hover:text-red-500 transition cursor-pointer"
+            >
+              {thread.isLiked ? (
+                <Heart
+                  size={16}
+                  className="fill-red-500 text-red-500 animate-pulse"
+                />
+              ) : (
+                <Heart size={16} />
+              )}
+              <span>{thread.likes}</span>
+            </button>
+
+            {/* Tombol Balasan */}
+            <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
+              <MessageCircle size={16} />
+              <span>{thread.reply}</span>
+            </button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ThreadCard;
