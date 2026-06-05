@@ -8,6 +8,7 @@ export interface Creator {
 export interface Thread {
   id: number;
   content: string;
+  image?: string | null;
   created_at: string;
   user: Creator;
   likes: number;

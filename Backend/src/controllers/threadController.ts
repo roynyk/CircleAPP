@@ -1,27 +1,56 @@
 import { Request, Response } from "express";
 import prisma from "../libs/prisma";
+import { broadcast } from "../libs/socket";
 
 export const createThread = async (req: Request, res: Response) => {
   try {
-    const { content, image } = req.body;
+    const { content } = req.body;
     const userId = (req as any).user.id;
-
+    const image = req.file ? req.file.filename : null;
     if (!content) {
       return res.status(400).json({
         message: "Konten thread tidak boleh kosong",
       });
     }
+    // 2. Simpan thread baru lengkap dengan merelasikan creator-nya
     const newThread = await prisma.thread.create({
       data: {
         content: content,
-        image: image || null,
+        image: image,
         createdById: userId,
       },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            photoProfile: true,
+          },
+        },
+      },
     });
-
+    // 3. Format data thread baru agar sesuai spesifikasi Frontend
+    const formattedThread = {
+      id: newThread.id,
+      content: newThread.content,
+      image: newThread.image,
+      user: {
+        id: newThread.creator.id,
+        username: newThread.creator.username,
+        name: newThread.creator.fullName,
+        profile_picture: newThread.creator.photoProfile,
+      },
+      created_at: newThread.createdAt,
+      likes: 0,
+      reply: 0,
+      isLiked: false,
+    };
+    // 4. Siarkan (broadcast) thread baru ke seluruh client aktif
+    broadcast("NEW_THREAD", formattedThread);
     return res.status(201).json({
       message: "Thread berhasil di buat",
-      data: newThread,
+      data: formattedThread,
     });
   } catch (error) {
     return res.status(500).json({
@@ -36,6 +65,7 @@ export const getThreads = async (req: Request, res: Response) => {
     const limit = req.query.limit
       ? parseInt(req.query.limit as string, 10)
       : 25;
+    // kalau menggunakan findMany itu udh termasuk dengan data yang di dalamnya, dalam kasus di bawah ini kan aku menggunakan threads, brrti data yang ada di dalam threads udh masuk, jadi di bawah ini kita hanya mengambil data yang berelasi dengan threads
     const threads = await prisma.thread.findMany({
       // include itu untuk menghubungan relasi antar table yang udh kita buat tadi
       take: limit,
@@ -73,6 +103,7 @@ export const getThreads = async (req: Request, res: Response) => {
       return {
         id: thread.id,
         content: thread.content,
+        image: thread.image,
         user: {
           id: thread.creator.id,
           username: thread.creator.username,
@@ -118,6 +149,7 @@ export const toggleLike = async (req: Request, res: Response) => {
     // 2. Periksa apakah user sudah memberikan Like pada thread ini sebelumnya
     const existingLike = await prisma.like.findUnique({
       where: {
+        // userId_threadId adalah nama index unik gabungan (Compound Unique Constraint) yang dibuat secara otomatis oleh Prisma Client.
         userId_threadId: {
           userId: userId,
           threadId: threadId,

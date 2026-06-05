@@ -53,10 +53,20 @@ const ThreadCard: React.FC<ThreadCardProps> = ({ thread, onLikeToggle }) => {
             </span>
           </div>
 
-          {/* Isi Tulisan Postingan */}
+          {/* Isi Tulisan Postingan (Baris 56 - 60) */}
           <p className="mt-1.5 text-sm text-gray-800 whitespace-pre-line leading-relaxed">
             {thread.content}
           </p>
+          {/* TAMPILKAN GAMBAR POSTINGAN (Jika ada) */}
+          {thread.image && (
+            <div className="mt-3 rounded-xl overflow-hidden border border-gray-100 max-h-80 bg-gray-50 flex items-center justify-center">
+              <img
+                src={`http://localhost:3000/uploads/${thread.image}`} // URL Backend static folder
+                alt="Thread attachment"
+                className="max-h-80 w-full object-contain"
+              />
+            </div>
+          )}
 
           {/* Tombol Interaksi (Like & Reply) */}
           <div className="mt-3 flex items-center space-x-6 text-gray-500">
