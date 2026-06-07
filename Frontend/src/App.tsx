@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import { Toaster } from "sonner";
 
 //Hanya izinkan masuk jika sudah terautentikasi (login)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -30,6 +31,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <Provider store={store}>
+      <Toaster richColors position="bottom-right" />
       <Router>
         <Routes>
           {/* Halaman Publik (khusus guest/belum login) */}

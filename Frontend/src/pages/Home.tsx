@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; //
 import { Thread } from "@/types/thread"; // Tipe data TypeScript
 import RightBar from "@/components/common/RightBar";
 import { LogOut, Circle, Image, X } from "lucide-react";
+import { toast } from "sonner";
 
 const Home = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -58,14 +59,21 @@ const Home = () => {
       // Jika ada event "NEW_THREAD" (siaran postingan baru)
       if (parsedData.event === "NEW_THREAD") {
         const newThread = parsedData.data;
-        // Masukkan thread baru ke paling atas feed
-        setThreads((prevThreads) => {
-          // Cegah duplikasi (jika thread id tersebut sudah ada di feed, abaikan)
-          const isExist = prevThreads.some((t) => t.id === newThread.id);
-          if (isExist) return prevThreads;
 
-          return [newThread, ...prevThreads];
-        });
+        // HANYA UNTUK USER LAIN (Bukan pembuat postingan)
+        if (newThread.user.id !== user?.id) {
+          // 1. Munculkan notifikasi toast melayang menggunakan Sonner
+          toast.info("Thread Baru!", {
+            description: `${newThread.user.name} (@${newThread.user.username}) memposting thread baru.`,
+            duration: 5000, // Tayang selama 5 detik
+          });
+          // 2. Masukkan thread baru tersebut ke feed agar langsung tampil di layar
+          setThreads((prevThreads) => {
+            const isExist = prevThreads.some((t) => t.id === newThread.id);
+            if (isExist) return prevThreads;
+            return [newThread, ...prevThreads];
+          });
+        }
       }
     };
     ws.onclose = () => {
@@ -87,7 +95,7 @@ const Home = () => {
         return;
       }
       setSelectedImage(file);
-      // Membuat URL sementara agar gambar bisa langsung tampil di UI sebagai preview
+      // URL.createObjectURL(file) adalah fungsi bawaan browser (Web API) yang digunakan untuk membuat alamat URL sementara (virtual) yang mengarah langsung ke file yang ada di komputer kita.
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -129,7 +137,7 @@ const Home = () => {
         id: createdThread.id,
         content: createdThread.content,
         image: createdThread.image,
-        created_at: createdThread.createdAt,
+        created_at: createdThread.created_at,
         user: {
           id: user?.id || 0,
           username: user?.username || "",

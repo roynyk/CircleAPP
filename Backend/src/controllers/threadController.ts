@@ -46,10 +46,23 @@ export const createThread = async (req: Request, res: Response) => {
       reply: 0,
       isLiked: false,
     };
-    // 4. Siarkan (broadcast) thread baru ke seluruh client aktif
+    //#region
+    //"NEW_THREAD" itu bukan bawaan WebSocket. Itu adalah nama buatan kita sendiri (bebas ditentukan).
+
+    // WebSocket secara protokol sebenarnya sangat sederhana dan "polos". Dia tidak mengerti konsep media sosial, dia hanya tahu cara mengirim teks biasa dari server ke browser.
+    // Kenapa Kita Menulis "NEW_THREAD"?
+    // Karena di aplikasi kita nanti, kita mungkin ingin mengirim berbagai macam jenis pesan real-time yang berbeda. Misalnya:
+
+    // Ketika ada postingan baru → Kita beri nama event: "NEW_THREAD"
+    // Ketika ada yang menyukai postingan → Kita beri nama event: "NEW_LIKE"
+    // Ketika ada komentar baru → Kita beri nama event: "NEW_REPLY"
+    // Nama ini berguna sebagai label atau tanda pengenal agar Frontend tidak kebingungan saat menerima pesan dari server.
+    //#endregion
     broadcast("NEW_THREAD", formattedThread);
+
+    // Kirim respon sukses langsung ke pembuat postingan
     return res.status(201).json({
-      message: "Thread berhasil di buat",
+      message: "Thread berhasil dibuat.",
       data: formattedThread,
     });
   } catch (error) {
@@ -133,7 +146,7 @@ export const getThreads = async (req: Request, res: Response) => {
 
 export const toggleLike = async (req: Request, res: Response) => {
   try {
-    const threadId = parseInt(req.params.threadId, 10);
+    const threadId = parseInt(req.params.threadId as string, 10);
     const userId = (req as any).user.id;
     if (isNaN(threadId)) {
       return res.status(400).json({ message: "ID Thread tidak valid" });
