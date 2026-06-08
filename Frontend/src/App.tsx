@@ -10,7 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-import { Toaster } from "sonner";
+import DetailThread from "./pages/DetailThread";
+import { Toaster } from "@/components/ui/sonner";
 
 //Hanya izinkan masuk jika sudah terautentikasi (login)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -66,6 +67,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/thread/:id"
+            element={
+              <ProtectedRoute>
+                <DetailThread />
               </ProtectedRoute>
             }
           />

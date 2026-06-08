@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import prisma from "../libs/prisma";
 import { broadcast } from "../libs/socket";
+import { includes } from "zod";
 
 export const createThread = async (req: Request, res: Response) => {
   try {
     const { content } = req.body;
     const userId = (req as any).user.id;
     const image = req.file ? req.file.filename : null;
-    if (!content) {
+    if (!content && !image) {
       return res.status(400).json({
         message: "Konten thread tidak boleh kosong",
       });
@@ -15,7 +16,7 @@ export const createThread = async (req: Request, res: Response) => {
     // 2. Simpan thread baru lengkap dengan merelasikan creator-nya
     const newThread = await prisma.thread.create({
       data: {
-        content: content,
+        content: content || "",
         image: image,
         createdById: userId,
       },
@@ -140,6 +141,100 @@ export const getThreads = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       message: `failed to load threads ${error}`,
+    });
+  }
+};
+
+export const getThreadById = async (req: Request, res: Response) => {
+  try {
+    const threadId = parseInt(req.params.id as string, 10);
+    if (isNaN(threadId)) {
+      return res.status(400).json({ message: "ID Thread tidak valid" });
+    }
+    const detailThread = await prisma.thread.findUnique({
+      where: {
+        id: threadId,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            photoProfile: true,
+          },
+        },
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                fullName: true,
+                photoProfile: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
+    });
+
+    if (!detailThread) {
+      return res.status(404).json({
+        status: "error",
+        message: "Detail thread tidak ditemukan",
+      });
+    }
+
+    const loggedInUserId = (req as any).user?.id;
+
+    const isLiked = loggedInUserId
+      ? detailThread.likes.some((like) => like.userId === loggedInUserId)
+      : false;
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "Get Detail data successfully",
+      data: {
+        id: detailThread.id,
+        content: detailThread.content,
+        image: detailThread.image,
+        user: {
+          id: detailThread.creator.id,
+          username: detailThread.creator.username,
+          name: detailThread.creator.fullName,
+          profile_picture: detailThread.creator.photoProfile,
+        },
+        created_at: detailThread.createdAt,
+        likes: detailThread.likes.length,
+        reply: detailThread.replies.length,
+        isLiked: isLiked,
+        replies: detailThread.replies.map((reply) => ({
+          id: reply.id,
+          content: reply.content,
+          user: {
+            id: reply.user.id,
+            username: reply.user.username,
+            name: reply.user.fullName,
+            profile_picture: reply.user.photoProfile,
+          },
+          created_at: reply.createdAt,
+          likes: 0,
+        })),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Gagal mengambil detail thread ${error}`,
     });
   }
 };
