@@ -4,6 +4,8 @@ import {
   getThreads,
   toggleLike,
   getThreadById,
+  getReplies,
+  createReply,
 } from "../controllers/threadController";
 import { upload } from "../libs/multer";
 
@@ -13,5 +15,7 @@ router.post("/create", upload.single("image"), createThread);
 router.get("/", getThreads);
 router.post("/:threadId/like", toggleLike);
 router.get("/:id", getThreadById);
+router.post("/:threadId/reply", upload.single("image"), createReply);
+router.get("/:id/replies", getReplies);
 
 export default router;

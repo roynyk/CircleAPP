@@ -42,7 +42,7 @@ const Home = () => {
     setImagePreview(null);
   };
 
-  // 2. Fungsi untuk mengirim postingan baru (POST /threads)
+  // Fungsi untuk mengirim postingan baru (POST /threads)
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // mencegah user mengisi postingan kosong dan mencegah user memosting spasi saja, karena pada dasarnya newPostContent.trim() itu nilainya false karena kosong, jadi tambahkan ! biar kondisinya true
@@ -58,13 +58,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* 1. Pasang Header di paling atas (Navbar Full Width) */}
       <Header />
-      {/* 2. Container Konten Utama di bawah Navbar */}
       <div className="max-w-5xl w-full mx-auto px-4 py-6 flex items-start space-x-6">
-        {/* Kolom Kiri: Feed & Form Input */}
         <div className="flex-1 max-w-2xl bg-white rounded-xl shadow-md overflow-hidden text-left">
-          {/* Form Input Postingan Baru (Header lama di atasnya sudah dibuang) */}
           <div className="p-6 border-b border-gray-200 flex space-x-4">
             <Avatar className="h-10 w-10">
               {user?.photoProfile && <AvatarImage src={user.photoProfile} />}
@@ -150,6 +146,7 @@ const Home = () => {
                   key={thread.id}
                   thread={thread}
                   onLikeToggle={toggleLike}
+                  isDetail={false}
                 />
               ))
             )}

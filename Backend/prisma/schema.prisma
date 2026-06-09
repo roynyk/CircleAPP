@@ -32,13 +32,9 @@ model User {
 
   // Relasi ke Likes
   likes          Like[]   @relation("UserLikes") // Relasi utama pencatat like
-  createdLikes   Like[]   @relation("LikeCreator")
-  updatedLikes   Like[]   @relation("LikeUpdater")
 
   // Relasi ke Replies
   replies        Reply[]  @relation("UserReplies") // Relasi utama pencatat reply
-  createdReplies Reply[]  @relation("ReplyCreator")
-  updatedReplies Reply[]  @relation("ReplyUpdater")
   @@map("users")
 }
 
@@ -84,17 +80,9 @@ model Like {
   threadId  Int      @map("thread_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // Kolom opsional tambahan untuk created_by dan updated_by
-  createdById Int?     @map("created_by")
-  updatedById Int?     @map("updated_by")
-
   // Relasi utama
   user      User     @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
   thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
-
-  // Relasi opsional tambahan
-  creator   User?    @relation("LikeCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  updater   User?    @relation("LikeUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
 
   // Mencegah duplikasi like pada thread yang sama
   @@unique([userId, threadId])
@@ -109,17 +97,10 @@ model Reply {
   image     String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
-  // Kolom opsional tambahan untuk created_by dan updated_by
-  createdById Int?     @map("created_by")
-  updatedById Int?     @map("updated_by")
 
   // Relasi utama
   user      User     @relation("UserReplies", fields: [userId], references: [id], onDelete: Cascade)
   thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
-  // Relasi opsional tambahan
-  creator   User?    @relation("ReplyCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  updater   User?    @relation("ReplyUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
   @@map("replies")
 }

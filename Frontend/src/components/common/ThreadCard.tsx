@@ -1,16 +1,9 @@
 import React from "react";
-import { Thread } from "@/types/thread";
+import { ThreadCardProps } from "@/types/thread";
 import { Heart, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Link } from "react-router-dom";
-
-interface ThreadCardProps {
-  thread: Thread;
-  onLikeToggle?: (threadId: number) => void;
-  onCardClick?: (threadId: number) => void;
-  isDetail: boolean;
-}
 
 // React.FC itu singkatan dari React Functional Component Ini adalah sebuah Tipe Data Bawaan dari TypeScript yang khusus digunakan untuk memberi tahu editor bahwa fungsi/variabel yang sedang kita buat ini adalah sebuah Komponen React (bukan fungsi javascript biasa).
 const ThreadCard: React.FC<ThreadCardProps> = ({
@@ -27,7 +20,8 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
     };
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
-  // KONTEN KARTU (Nama, Username, Teks, & Gambar)
+
+  // Content card body
   const CardBody = (
     <>
       {/* Header Kartu (Nama, Username, Tanggal) */}
@@ -74,7 +68,7 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          {/* 2. KONDISI: Jika halaman detail, tampilkan isi biasa. Jika feed, bungkus dengan <Link> */}
+          {/*KONDISI: Jika halaman detail, tampilkan isi biasa. Jika feed, bungkus dengan <Link> */}
           {isDetail ? (
             <div>{CardBody}</div>
           ) : (
@@ -101,10 +95,21 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
               )}
               <span>{thread.likes}</span>
             </button>
-            <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
-              <MessageCircle size={16} />
-              <span>{thread.reply}</span>
-            </button>
+            {isDetail ? (
+              <div>
+                <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
+                  <MessageCircle size={16} />
+                  <span>{thread.reply}</span>
+                </button>
+              </div>
+            ) : (
+              <Link to={`/thread/${thread.id}`}>
+                <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
+                  <MessageCircle size={16} />
+                  <span>{thread.reply}</span>
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </CardContent>

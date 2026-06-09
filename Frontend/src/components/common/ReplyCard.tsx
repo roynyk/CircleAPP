@@ -1,19 +1,6 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// 1. Definisikan tipe data untuk properti (props) yang diterima oleh ReplyCard
-interface ReplyData {
-  id: number;
-  content: string;
-  user: {
-    id: number;
-    username: string;
-    name: string;
-    profile_picture: string | null;
-    avatar: string | null;
-  };
-  created_at: string;
-}
+import { ReplyData } from "@/types/thread";
 
 interface ReplyCardProps {
   reply: ReplyData;
@@ -33,9 +20,9 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
     <div className="py-4 flex space-x-3">
       {/* 3. Tampilkan Avatar Pembuat Komentar */}
       <Avatar className="h-8 w-8">
-        {(reply.user.profile_picture || reply.user.avatar) && (
+        {reply.user.profile_picture && (
           <AvatarImage
-            src={reply.user.profile_picture || reply.user.avatar || ""}
+            src={reply.user.profile_picture || ""}
             alt={reply.user.username}
           />
         )}
@@ -60,9 +47,21 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
         </div>
 
         {/* 5. Bagian Isi Komentar */}
-        <p className="mt-1 text-xs text-gray-700 whitespace-pre-line leading-relaxed">
-          {reply.content}
-        </p>
+        {reply.content && (
+          <p className="mt-1 text-xs text-gray-700 whitespace-pre-line leading-relaxed">
+            {reply.content}
+          </p>
+        )}
+
+        {reply.image && (
+          <div className="mt-2 rounded-xl overflow-hidden border border-gray-100 max-h-60 bg-gray-50 flex items-center justify-center">
+            <img
+              src={`http://localhost:3000/uploads/${reply.image}`} // Arahkan ke folder static uploads backend
+              alt="Reply attachment"
+              className="max-h-60 w-full object-contain"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

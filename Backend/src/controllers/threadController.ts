@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../libs/prisma";
 import { broadcast } from "../libs/socket";
-import { includes } from "zod";
 
 export const createThread = async (req: Request, res: Response) => {
   try {
@@ -221,6 +220,7 @@ export const getThreadById = async (req: Request, res: Response) => {
         replies: detailThread.replies.map((reply) => ({
           id: reply.id,
           content: reply.content,
+          image: reply.image,
           user: {
             id: reply.user.id,
             username: reply.user.username,
@@ -235,6 +235,129 @@ export const getThreadById = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       message: `Gagal mengambil detail thread ${error}`,
+    });
+  }
+};
+
+export const createReply = async (req: Request, res: Response) => {
+  try {
+    const threadId = parseInt(req.params.threadId as string, 10);
+    const userId = (req as any).user.id;
+    const { content } = req.body;
+    const image = req.file ? req.file.filename : null;
+    if (!image && !content.trim()) {
+      return res.status(404).json({
+        status: 404,
+        message: `Konten Reply tidak boleh kosong!!`,
+      });
+    }
+
+    if (isNaN(threadId)) {
+      return res.status(400).json({
+        message: "ID Thread tidak valid",
+      });
+    }
+
+    const newReply = await prisma.reply.create({
+      data: {
+        content: content || "",
+        image: image,
+        userId: userId,
+        threadId: threadId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            photoProfile: true,
+          },
+        },
+      },
+    });
+
+    const formattedReply = {
+      id: newReply.id,
+      content: newReply.content,
+      created_at: newReply.createdAt,
+      image: newReply.image,
+      threadId: newReply.threadId,
+      user: {
+        id: newReply.userId,
+        username: newReply.user.username,
+        name: newReply.user.fullName,
+        profile_picture: newReply.user.photoProfile,
+      },
+    };
+
+    broadcast("NEW_REPLY", formattedReply);
+
+    return res.status(200).json({
+      message: "Balasan berhasil di tambahkan",
+      data: formattedReply,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: `Gagal membuat reply ${error}`,
+    });
+  }
+};
+
+export const getReplies = async (req: Request, res: Response) => {
+  try {
+    const threadId = parseInt(req.params.id as string, 10);
+
+    if (isNaN(threadId)) {
+      return res.status(400).json({
+        code: 400,
+        status: "error",
+        message: "ID Thread tidak valid",
+      });
+    }
+
+    const replies = await prisma.reply.findMany({
+      where: {
+        threadId: threadId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            username: true,
+            photoProfile: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const formattedReplies = replies.map((reply) => ({
+      id: reply.id,
+      content: reply.content,
+      created_at: reply.createdAt,
+      image: reply.image,
+      user: {
+        id: reply.user.id,
+        name: reply.user.fullName,
+        username: reply.user.username,
+        photoProfile: reply.user.photoProfile,
+      },
+    }));
+
+    return res.status(200).json({
+      code: 200,
+      status: "Success",
+      message: "Get Replies data Successfully",
+      data: formattedReplies,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: `Data gagal di tampilkan ${error}`,
     });
   }
 };

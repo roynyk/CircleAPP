@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
+import {
+  setThreads,
+  addThread,
+  toggleLikeRedux,
+  incrementReplyCount,
+} from "@/redux/threadSlice";
 import api from "@/lib/axios";
 import { Thread } from "@/types/thread";
 import { toast } from "sonner";
@@ -9,12 +15,12 @@ export const useThreads = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   // Seluruh State Data dipindahkan ke sini
-  const [threads, setThreads] = useState<Thread[]>([]);
+  // Mengambil data threads dari Redux (Retrieve data like from Redux)
+  const threads = useSelector((state: RootState) => state.threads.threads);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isPosting, setIsPosting] = useState(false);
-
-  // Aksi 1: Ambil Thread Awal dari Backend
 
   useEffect(() => {
     const fetchThreads = async () => {
@@ -22,7 +28,7 @@ export const useThreads = () => {
         setLoading(true);
         const response = await api.get("/threads");
         // Sesuai format respons backend response.data.data.threads
-        setThreads(response.data.data.threads);
+        dispatch(setThreads(response.data.data.threads));
       } catch (err) {
         setError("Gagal memuat daftar postingan.");
         console.error(err);
@@ -33,12 +39,12 @@ export const useThreads = () => {
     fetchThreads();
   }, []);
 
-  // Aksi 2: Pendengar Real-Time WebSocket & Notifikasi Toast
+  // Pendengar Real-Time WebSocket & Notifikasi Toast
   useEffect(() => {
-    // 1. Hubungkan browser ke port server WebSocket Backend (port 3000)
+    // Hubungkan browser ke port server WebSocket Backend (port 3000)
     const ws = new WebSocket("ws://localhost:3000");
 
-    // 2. Dengarkan pesan/siaran yang masuk dari backend
+    // Dengarkan pesan/siaran yang masuk dari backend
     ws.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
       // Jika ada event "NEW_THREAD" (siaran postingan baru)
@@ -47,28 +53,30 @@ export const useThreads = () => {
 
         // HANYA UNTUK USER LAIN (Bukan pembuat postingan)
         if (newThread.user.id !== user?.id) {
-          // 1. Munculkan notifikasi toast melayang menggunakan Sonner
+          // Munculkan notifikasi toast melayang menggunakan Sonner
           toast.info("Thread Baru!", {
             classNames: { toast: "bg-black-600", title: "text-white-400" },
             description: `${newThread.user.name} (@${newThread.user.username}) memposting thread baru.`,
             duration: 5000, // Tayang selama 5 detik
           });
-          // 2. Masukkan thread baru tersebut ke feed agar langsung tampil di layar
-          setThreads((prevThreads) => {
-            const isExist = prevThreads.some((t) => t.id === newThread.id);
-            if (isExist) return prevThreads;
-            return [newThread, ...prevThreads];
-          });
+
+          const isExist = threads.some((thread) => thread.id === newThread.id);
+          if (!isExist) {
+            dispatch(addThread(newThread));
+          }
         }
+      } else if (parsedData.event === "NEW_REPLY") {
+        const newReply = parsedData.data;
+        dispatch(incrementReplyCount(newReply.threadId));
       }
     };
-    // 3. Bersihkan koneksi saat halaman ditutup atau berpindah agar tidak terjadi kebocoran memori (memory leak)
+
     return () => {
       ws.close();
     };
   }, [user?.id]);
 
-  // Aksi 3: Membuat Thread Baru (FormData)
+  // Membuat Thread Baru (FormData)
   const createThread = async (content: string, image: File | null) => {
     setIsPosting(true);
     try {
@@ -108,7 +116,7 @@ export const useThreads = () => {
         isLiked: false,
       };
       // Taruh postingan baru di urutan paling atas feed
-      setThreads([formattedNewThread, ...threads]);
+      dispatch(setThreads([formattedNewThread, ...threads]));
       return true;
     } catch (err) {
       console.error(err);
@@ -119,33 +127,18 @@ export const useThreads = () => {
     }
   };
 
-  // Aksi 4: Toggle Like (Optimistic Update)
+  //Toggle Like (Optimistic Update)
   const toggleLike = async (threadId: number) => {
-    // 1. Simpan salinan data threads sebelumnya untuk cadangan rollback jika gagal
-    const originalThreads = [...threads];
-
-    // 2. Lakukan Optimistic Update (Ubah UI secara instan)
-    setThreads(
-      threads.map((thread) => {
-        if (thread.id === threadId) {
-          const isCurrentlyLiked = thread.isLiked;
-          return {
-            ...thread,
-            likes: isCurrentlyLiked ? thread.likes - 1 : thread.likes + 1,
-            isLiked: !isCurrentlyLiked,
-          };
-        }
-        return thread;
-      }),
-    );
+    //Lakukan Optimistic Update (Ubah UI secara instan)
+    dispatch(toggleLikeRedux(threadId));
 
     try {
-      // 3. Kirim request ke backend untuk menyimpan data ke database
+      //Kirim request ke backend untuk menyimpan data ke database
       await api.post(`/threads/${threadId}/like`);
     } catch (err) {
       console.error("Gagal menyinkronkan like ke server:", err);
-      // 4. Rollback tampilan jika API gagal
-      setThreads(originalThreads);
+      //Rollback tampilan jika API gagal
+      dispatch(toggleLikeRedux(threadId));
       alert("Gagal memperbarui status like.");
     }
   };

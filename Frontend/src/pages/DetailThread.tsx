@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/lib/axios";
-import { Thread } from "@/types/thread";
+import { ReplyData, Thread } from "@/types/thread";
 import Header from "@/components/common/Header";
 import RightBar from "@/components/common/RightBar";
 import ThreadCard from "@/components/common/ThreadCard"; // <--- Gunakan ThreadCard bawaan
@@ -9,23 +9,15 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import ReplyForm from "@/components/common/ReplyForm";
 import ReplyCard from "@/components/common/ReplyCard";
-
-interface ReplyData {
-  id: number;
-  content: string;
-  user: {
-    id: number;
-    username: string;
-    name: string;
-    profile_picture: string | null;
-    avatar: string | null;
-  };
-  created_at: string;
-}
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { toggleLikeRedux } from "@/redux/threadSlice";
 
 const DetailThread: React.FC = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [thread, setThread] = useState<Thread | null>(null);
   const [replies, setReplies] = useState<ReplyData[]>([]);
@@ -41,7 +33,9 @@ const DetailThread: React.FC = () => {
 
         const response = await api.get(`/threads/${id}`);
         setThread(response.data.data);
-        setReplies(response.data.data.replies || []);
+
+        const repliesResponse = await api.get(`/threads/${id}/replies`);
+        setReplies(repliesResponse.data.data || []);
       } catch (err: any) {
         console.error(err);
         setError(
@@ -57,6 +51,49 @@ const DetailThread: React.FC = () => {
     }
   }, [id]);
 
+  // Aksi WebSocket untuk real-time reply
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+
+    ws.onmessage = (event) => {
+      const parsedData = JSON.parse(event.data);
+      if (parsedData.event === "NEW_REPLY") {
+        const newReply = parsedData.data;
+
+        // Pastikan balasan ini ditujukan untuk thread yang sedang kita buka saat ini
+        if (
+          newReply.threadId === parseInt(id || "", 10) &&
+          newReply.user.id !== user?.id
+        ) {
+          // Tambahkan ke list replies
+          setReplies((prevReplies) => {
+            const isExist = prevReplies.some((r) => r.id === newReply.id);
+            if (isExist) return prevReplies;
+            return [newReply, ...prevReplies]; // Menaruh di urutan teratas
+          });
+
+          // Tambahkan counter reply di card thread detail
+          setThread((prevThread) => {
+            if (!prevThread) return null;
+            return {
+              ...prevThread,
+              reply: prevThread.reply + 1,
+            };
+          });
+
+          // Tampilkan notifikasi balon
+          toast.info("Balasan Baru!", {
+            description: `${newReply.user.name} baru saja membalas postingan ini.`,
+          });
+        }
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [id, user?.id]);
+
   const handleLikeToggle = async () => {
     if (!thread) return;
     const originalThread = { ...thread };
@@ -67,30 +104,50 @@ const DetailThread: React.FC = () => {
       isLiked: !thread.isLiked,
     });
 
+    dispatch(toggleLikeRedux(thread.id));
+
     try {
       await api.post(`/threads/${thread.id}/like`);
     } catch (err) {
       console.error(err);
+      // Rollback lokal jika gagal
       setThread(originalThread);
+      // Rollback Redux jika gagal
+      dispatch(toggleLikeRedux(thread.id));
     }
   };
 
-  const handleReplySubmit = async (content: string) => {
+  const handleReplySubmit = async (content: string, image: File | null) => {
     setIsSubmitting(true);
     try {
-      const response = await api.post(`/threads/${id}/reply`, {
-        content,
-      });
-
-      const newReply = response.data.data;
-      setReplies((prevReplies) => [...prevReplies, newReply]);
-
-      if (thread) {
-        setThread({
-          ...thread,
-          reply: thread.reply + 1,
-        });
+      const formData = new FormData();
+      formData.append("content", content);
+      if (image) {
+        formData.append("image", image);
       }
+      const response = await api.post(`/threads/${id}/reply`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const newReply = response.data.data;
+
+      const formattedNewReply: ReplyData = {
+        id: newReply.id,
+        content: newReply.content,
+        created_at: newReply.created_at,
+        image: newReply.image,
+        user: {
+          id: user?.id || 0,
+          username: user?.username || "",
+          name: user?.fullName || "",
+          profile_picture: user?.photoProfile || null,
+        },
+        likes: 0,
+        reply: 0,
+      };
+      setReplies((prevReplies) => [formattedNewReply, ...prevReplies]);
+
       toast.success("Balasan berhasil diposting");
     } catch (err) {
       console.error("Gagal mengirim balasan:", err);
