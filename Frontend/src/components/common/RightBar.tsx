@@ -2,6 +2,7 @@ import React from "react";
 import { TrendingUp, UserPlus, Flame } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { CardProfile } from "./CardProfile";
 
 const RightBar: React.FC = () => {
   const suggestedUsers = [
@@ -40,6 +41,7 @@ const RightBar: React.FC = () => {
 
   return (
     <aside className="w-80 hidden lg:flex flex-col space-y-6 p-6 h-fit sticky top-6">
+      <CardProfile />
       {/* Box 1: Rekomendasi User */}
       <div className="glass-card rounded-2xl p-5 space-y-4">
         <div className="flex items-center space-x-2 text-slate-800">

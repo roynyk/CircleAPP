@@ -6,7 +6,7 @@ import { authentication } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.use("/users", userRoute);
+router.use("/users", authentication, userRoute);
 router.use("/auth", authRoute);
 router.use("/threads", authentication, threadRoute);
 

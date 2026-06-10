@@ -52,7 +52,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-6 flex items-start space-x-3 bg-gray-50 p-4 rounded-xl"
+      className="mt-6 flex items-start space-x-3 bg-gray-50 p-4 rounded-xl min-w-0 w-full"
     >
       {/* Textarea Input Balasan */}
       <Textarea

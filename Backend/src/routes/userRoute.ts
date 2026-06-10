@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getUser } from "../controllers/userController";
-import { authentication } from "../middlewares/authMiddleware";
+import { getUser, updateProfile } from "../controllers/userController";
+import { upload } from "../libs/multer";
 
 const router = Router();
 
-router.get("/user", authentication, getUser);
+router.get("/user", getUser);
+router.patch("/update", upload.single("photoProfile"), updateProfile);
 
 export default router;

@@ -59,11 +59,7 @@ export const useThreads = () => {
             description: `${newThread.user.name} (@${newThread.user.username}) memposting thread baru.`,
             duration: 5000, // Tayang selama 5 detik
           });
-
-          const isExist = threads.some((thread) => thread.id === newThread.id);
-          if (!isExist) {
-            dispatch(addThread(newThread));
-          }
+          dispatch(addThread(newThread));
         }
       } else if (parsedData.event === "NEW_REPLY") {
         const newReply = parsedData.data;

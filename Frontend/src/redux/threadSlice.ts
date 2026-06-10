@@ -19,7 +19,10 @@ const threadSlice = createSlice({
     },
     // Menambahkan thread baru di Redux saat user memposting
     addThread: (state, action: PayloadAction<Thread>) => {
-      state.threads = [action.payload, ...state.threads];
+      const isExist = state.threads.some((t) => t.id === action.payload.id);
+      if (!isExist) {
+        state.threads = [action.payload, ...state.threads];
+      }
     },
     // Mengupdate status like (isLiked & jumlah likes) secara instan di Redux
     toggleLikeRedux: (state, action: PayloadAction<number>) => {

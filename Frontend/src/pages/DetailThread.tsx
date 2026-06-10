@@ -11,7 +11,7 @@ import ReplyForm from "@/components/common/ReplyForm";
 import ReplyCard from "@/components/common/ReplyCard";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { toggleLikeRedux } from "@/redux/threadSlice";
+import { toggleLikeRedux, incrementReplyCount } from "@/redux/threadSlice";
 
 const DetailThread: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -147,6 +147,10 @@ const DetailThread: React.FC = () => {
         reply: 0,
       };
       setReplies((prevReplies) => [formattedNewReply, ...prevReplies]);
+      setThread((prevThread) => {
+        if (!prevThread) return null;
+        return { ...prevThread, reply: prevThread.reply + 1 };
+      });
 
       toast.success("Balasan berhasil diposting");
     } catch (err) {
@@ -161,9 +165,9 @@ const DetailThread: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
 
-      <div className="max-w-5xl w-full mx-auto px-4 py-6 flex items-start space-x-6">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex items-start space-x-6 min-w-0">
         {/* Kolom Kiri: Detail Thread & Replies */}
-        <div className="flex-1 max-w-2xl bg-white rounded-xl shadow-md p-6 text-left">
+        <div className="flex-1 max-w-4xl w-full min-w-0 bg-white rounded-xl shadow-md p-6 text-left">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center space-x-2 text-gray-500 hover:text-slate-800 mb-6 transition cursor-pointer"

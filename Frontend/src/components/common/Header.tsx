@@ -29,7 +29,7 @@ const Header: React.FC = () => {
   return (
     <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
       {/* max-w-5xl menyelaraskan lebar konten navbar dengan kolom di bawahnya */}
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
         {/* KIPi: Logo */}
         <Link
           to="/home"
@@ -77,7 +77,14 @@ const Header: React.FC = () => {
               </div>
               <Avatar className="h-8 w-8 border border-blue-500/20 shadow-sm">
                 {user.photoProfile && (
-                  <AvatarImage src={user.photoProfile} alt={user.fullName} />
+                  <AvatarImage
+                    src={
+                      user.photoProfile.startsWith("http")
+                        ? user.photoProfile
+                        : `http://localhost:3000/uploads/${user.photoProfile}`
+                    }
+                    alt={user.fullName}
+                  />
                 )}
                 <AvatarFallback className="bg-blue-50 text-blue-600 font-bold uppercase text-xs">
                   {user.fullName?.[0] || "U"}

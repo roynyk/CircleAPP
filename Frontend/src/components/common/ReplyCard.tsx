@@ -17,7 +17,7 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
   };
 
   return (
-    <div className="py-4 flex space-x-3">
+    <div className="py-4 flex space-x-3 ">
       {/* 3. Tampilkan Avatar Pembuat Komentar */}
       <Avatar className="h-8 w-8">
         {reply.user.profile_picture && (
@@ -31,7 +31,7 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
         </AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 text-left">
+      <div className="flex-1 text-left min-w-0">
         {/* 4. Bagian Header Komentar (Nama, Username, Tanggal Komentar) */}
         <div className="flex items-center space-x-2">
           <span className="font-bold text-gray-900 text-xs">
@@ -46,9 +46,8 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
           </span>
         </div>
 
-        {/* 5. Bagian Isi Komentar */}
         {reply.content && (
-          <p className="mt-1 text-xs text-gray-700 whitespace-pre-line leading-relaxed">
+          <p className="mt-1 text-xs text-gray-700 whitespace-pre-line leading-relaxed break-words">
             {reply.content}
           </p>
         )}

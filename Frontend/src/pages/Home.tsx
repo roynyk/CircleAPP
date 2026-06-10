@@ -59,8 +59,8 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      <div className="max-w-5xl w-full mx-auto px-4 py-6 flex items-start space-x-6">
-        <div className="flex-1 max-w-2xl bg-white rounded-xl shadow-md overflow-hidden text-left">
+      <div className="max-w-7xl w-full mx-auto px-4 py-6 flex items-start space-x-6 min-w-0">
+        <div className="flex-1 max-w-4xl w-full min-w-0 text-left">
           <div className="p-6 border-b border-gray-200 flex space-x-4">
             <Avatar className="h-10 w-10">
               {user?.photoProfile && <AvatarImage src={user.photoProfile} />}
@@ -69,7 +69,10 @@ const Home = () => {
               </AvatarFallback>
             </Avatar>
 
-            <form onSubmit={handlePostSubmit} className="flex-1 space-y-3">
+            <form
+              onSubmit={handlePostSubmit}
+              className="flex-1 min-w-0 w-full space-y-3"
+            >
               <Textarea
                 placeholder="Apa yang sedang kamu pikirkan hari ini?"
                 value={newPostContent}
@@ -129,28 +132,30 @@ const Home = () => {
             </form>
           </div>
           {/* Daftar Feed Postingan */}
-          <div className="divide-y divide-gray-100">
-            {loading ? (
-              <p className="p-6 text-center text-gray-500">
-                Sedang memuat postingan...
-              </p>
-            ) : error ? (
-              <p className="p-6 text-center text-red-500">{error}</p>
-            ) : threads.length === 0 ? (
-              <p className="p-6 text-center text-gray-500">
-                Belum ada postingan saat ini. Jadilah yang pertama memposting!
-              </p>
-            ) : (
-              threads.map((thread) => (
-                <ThreadCard
-                  key={thread.id}
-                  thread={thread}
-                  onLikeToggle={toggleLike}
-                  isDetail={false}
-                />
-              ))
-            )}
-          </div>
+
+          {loading ? (
+            <p className="p-6 text-center text-gray-500">
+              Sedang memuat postingan...
+            </p>
+          ) : error ? (
+            <p className="p-6 text-center text-red-500">{error}</p>
+          ) : threads.length === 0 ? (
+            <p className="p-6 text-center text-gray-500">
+              Belum ada postingan saat ini. Jadilah yang pertama memposting!
+            </p>
+          ) : (
+            <div className="columns-1 sm:columns-2 gap-4">
+              {threads.map((thread) => (
+                <div key={thread.id} className="break-inside-avoid mb-4">
+                  <ThreadCard
+                    thread={thread}
+                    onLikeToggle={toggleLike}
+                    isDetail={false}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <RightBar />
       </div>
