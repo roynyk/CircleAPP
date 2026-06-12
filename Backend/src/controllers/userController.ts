@@ -271,6 +271,40 @@ export const searchUser = async (req: Request, res: Response) => {
   try {
     const { q } = req.query;
     const userId = (req as any).user.id;
+
+    if (!q || typeof q !== "string") {
+      return res.status(200).json({
+        status: 200,
+        data: [],
+      });
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        AND: [
+          { id: { not: userId } },
+          {
+            OR: [
+              { fullName: { contains: q, mode: "insensitive" } },
+              { username: { contains: q, mode: "insensitive" } },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        username: true,
+        fullName: true,
+        photoProfile: true,
+        bio: true,
+      },
+      take: 10,
+    });
+
+    return res.status(200).json({
+      status: "success",
+      data: users,
+    });
   } catch (error) {
     return res.status(404).json({
       message: `Gagal memuat data Search User ${error}`,

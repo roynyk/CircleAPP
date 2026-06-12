@@ -102,7 +102,7 @@ export const login = async (req: Request, res: Response) => {
 // 4. Mengambil detail profil user lain berdasarkan ID (untuk Hover Card / Halaman Profil Orang Lain)
 export const getUserById = async (req: Request, res: Response) => {
   try {
-    const targetUserId = parseInt(req.params.id); // ID user yang di-hover/dilihat
+    const targetUserId = parseInt(req.params.id as string); // ID user yang di-hover/dilihat
     const currentUserId = (req as any).user.id; // ID kita sendiri yang sedang login
 
     if (isNaN(targetUserId)) {

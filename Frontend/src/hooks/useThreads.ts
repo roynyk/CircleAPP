@@ -105,7 +105,7 @@ export const useThreads = () => {
           id: user?.id || 0,
           username: user?.username || "",
           name: user?.fullName || "",
-          profile_picture: user?.photoProfile || null,
+          photoProfile: user?.photoProfile || null,
         },
         likes: 0,
         reply: 0,

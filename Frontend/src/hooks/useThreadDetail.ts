@@ -8,12 +8,10 @@ import {
 } from "@/redux/threadSlice";
 import api from "@/lib/axios";
 import { toast } from "sonner";
-import { ReplyData, Thread } from "@/types/thread";
-import { useNavigate } from "react-router-dom";
+import { ReplyData } from "@/types/thread";
 
 export const useThreadDetail = (threadIdString: string | undefined) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const threadId = threadIdString ? parseInt(threadIdString, 10) : NaN;
 
   // 1. Ambil data profil kita (untuk WebSocket check)
@@ -57,7 +55,7 @@ export const useThreadDetail = (threadIdString: string | undefined) => {
     };
 
     fetchThreadDetail();
-  }, [threadId, thread, dispatch]);
+  }, [threadId, dispatch]);
 
   // B. Koneksi WebSocket untuk real-time reply
   useEffect(() => {
@@ -132,7 +130,7 @@ export const useThreadDetail = (threadIdString: string | undefined) => {
           id: user?.id || 0,
           username: user?.username || "",
           name: user?.fullName || "",
-          profile_picture: user?.photoProfile || null,
+          photoProfile: user?.photoProfile || null,
         },
         likes: 0,
         reply: 0,

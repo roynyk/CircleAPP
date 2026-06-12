@@ -75,7 +75,7 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
         }),
       );
     } catch (error) {
-      toast.error("Gagal mengubah status ikutan");
+      toast.error("Tidak dapat memfollow diri sendiri");
     }
   };
 

@@ -96,7 +96,7 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Bio User (Diambil langsung dari Redux) */}
-            <p className="mt-3.5 text-sm text-slate-600 leading-relaxed">
+            <p className="mt-3.5 text-sm text-slate-600 leading-relaxed break-words">
               {user.bio || "Belum ada bio."}
             </p>
 

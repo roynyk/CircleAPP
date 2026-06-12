@@ -2,7 +2,7 @@ export interface Creator {
   id: number;
   username: string;
   name: string;
-  profile_picture: string | null;
+  photoProfile: string | null;
 }
 
 export interface Thread {
@@ -27,7 +27,7 @@ export interface ReplyData {
     id: number;
     username: string;
     name: string;
-    profile_picture: string | null;
+    photoProfile: string | null;
   };
   created_at: string;
 }

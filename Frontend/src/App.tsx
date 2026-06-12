@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import DetailThread from "./pages/DetailThread";
 import { Toaster } from "@/components/ui/sonner";
+import Search from "./pages/Search";
 
 //Hanya izinkan masuk jika sudah terautentikasi (login)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -75,6 +76,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DetailThread />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <Search />
               </ProtectedRoute>
             }
           />

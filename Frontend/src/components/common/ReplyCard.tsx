@@ -21,9 +21,9 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
     <div className="py-4 flex space-x-3 ">
       {/* 3. Tampilkan Avatar Pembuat Komentar */}
       <Avatar className="h-8 w-8">
-        {reply.user.profile_picture && (
+        {reply.user.photoProfile && (
           <AvatarImage
-            src={reply.user.profile_picture || ""}
+            src={getAvatarUrl(reply.user.photoProfile)}
             alt={reply.user.username}
           />
         )}

@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
-import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
+import { getAvatarUrl } from "@/lib/utils";
 import api from "@/lib/axios";
 
 interface EditProfileModalProps {

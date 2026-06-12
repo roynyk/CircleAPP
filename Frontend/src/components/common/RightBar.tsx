@@ -157,7 +157,7 @@ const RightBar: React.FC = () => {
       </div>
       {/* 4. Render Footer Catatan Kaki */}
       <div className="px-2 text-[9px] text-slate-400/80 leading-relaxed text-left space-y-1">
-        <div className="flex flex-wrap gap-x-2 gap-y-0.5 font-semibold">
+        <div className="flex flex-wrap gap-x-2 gap-y-0.5 font-semibold text-sm">
           <a href="#" className="hover:underline">
             Terms of Service
           </a>

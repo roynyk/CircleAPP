@@ -74,16 +74,6 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
         {/* Tab Switcher */}
         <div className="flex border-b border-slate-100/80 text-center text-xs font-bold text-slate-500 flex-shrink-0">
           <button
-            onClick={() => setActiveTab("followers")}
-            className={`flex-1 py-3 border-b-2 transition duration-200 cursor-pointer ${
-              activeTab === "followers"
-                ? "border-blue-500 text-blue-600 font-extrabold"
-                : "border-transparent hover:text-slate-700"
-            }`}
-          >
-            Pengikut (Followers)
-          </button>
-          <button
             onClick={() => setActiveTab("following")}
             className={`flex-1 py-3 border-b-2 transition duration-200 cursor-pointer ${
               activeTab === "following"
@@ -92,6 +82,16 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
             }`}
           >
             Mengikuti (Following)
+          </button>
+          <button
+            onClick={() => setActiveTab("followers")}
+            className={`flex-1 py-3 border-b-2 transition duration-200 cursor-pointer ${
+              activeTab === "followers"
+                ? "border-blue-500 text-blue-600 font-extrabold"
+                : "border-transparent hover:text-slate-700"
+            }`}
+          >
+            Pengikut (Followers)
           </button>
         </div>
 

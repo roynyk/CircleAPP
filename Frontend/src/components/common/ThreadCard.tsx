@@ -59,29 +59,30 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
   return (
     <Card className="w-full bg-white border border-gray-100/80 rounded-2xl shadow-sm hover:shadow-md transition duration-300 text-left">
       <CardContent className="p-4 flex space-x-3">
-        {/* Avatar Profil */}
-        <Avatar
-          className="h-9 w-9 flex-shrink-0 cursor-pointer overflow-hidden rounded-full"
-          onClick={(e) => e.stopPropagation()} // Mencegah masuk ke halaman detail thread saat avatar diklik
-        >
+        <div className="flex-shrink-0 self-start">
           <ProfileHoverCard userId={thread.user.id}>
-            {thread.user.profile_picture ? (
-              <AvatarImage
-                src={
-                  thread.user.profile_picture.startsWith("http")
-                    ? thread.user.profile_picture
-                    : getAvatarUrl(thread.user.profile_picture)
-                }
-                alt={thread.user.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-bold uppercase w-full h-full flex items-center justify-center">
-                {thread.user.name[0]}
-              </AvatarFallback>
-            )}
+            <Avatar
+              className="h-9 w-9 cursor-pointer overflow-hidden rounded-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {thread.user.photoProfile ? (
+                <AvatarImage
+                  src={
+                    thread.user.photoProfile.startsWith("http")
+                      ? thread.user.photoProfile
+                      : getAvatarUrl(thread.user.photoProfile)
+                  }
+                  alt={thread.user.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-bold uppercase w-full h-full flex items-center justify-center">
+                  {thread.user.name[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
           </ProfileHoverCard>
-        </Avatar>
+        </div>
         <div className="flex-1 min-w-0">
           {/* KONDISI: Jika halaman detail, tampilkan isi biasa. Jika feed, bungkus dengan <Link> */}
           {isDetail ? (
