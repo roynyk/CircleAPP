@@ -10,6 +10,8 @@ import { ArrowLeft, MapPin, Calendar, LinkIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useThreads } from "@/hooks/useThreads";
 import { EditProfileModal } from "@/components/common/EditProfileModal";
+import { FollowsModal } from "@/components/common/FollowsModal";
+import { getAvatarUrl } from "@/lib/utils";
 
 const Profile: React.FC = () => {
   // 1. Mengambil data user yang sedang login dari Redux (Retrieve data profile from Redux)
@@ -20,23 +22,19 @@ const Profile: React.FC = () => {
   const { toggleLike } = useThreads();
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isFollowsOpen, setIsFollowsOpen] = useState(false);
+  const [followsTab, setFollowsTab] = useState<"followers" | "following">(
+    "followers",
+  );
 
   if (!user) return null;
 
-  // 3. Filter postingan agar HANYA menampilkan milik user yang sedang aktif saat ini
+  // Filter postingan agar HANYA menampilkan milik user yang sedang aktif saat ini
   const myThreads = threads.filter((thread) => thread.user.id === user.id);
-
-  // Helper untuk memformat URL Avatar (bisa handle URL eksternal maupun nama file lokal)
-  const getAvatarUrl = (photo: string | null | undefined) => {
-    if (!photo) return undefined;
-    if (photo.startsWith("http")) return photo;
-    return `http://localhost:3000/uploads/${photo}`;
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex items-start space-x-6 min-w-0">
         {/* Kolom Kiri: Informasi Profil & Postingan User */}
         <div className="flex-1 max-w-4xl w-full min-w-0 bg-white rounded-xl shadow-md overflow-hidden text-left">
@@ -120,15 +118,30 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            {/* Statistik Followers / Following (Diambil langsung dari Redux) */}
+            {/* Statistik Followers / Following */}
             <div className="mt-4 flex items-center space-x-5 pt-4 border-t border-slate-100 text-sm">
-              <div className="flex items-center space-x-1.5 cursor-pointer hover:underline">
+              {/* 1. Tambahkan onClick untuk Mengikuti (Following) */}
+              <div
+                onClick={() => {
+                  setFollowsTab("following");
+                  setIsFollowsOpen(true);
+                }}
+                className="flex items-center space-x-1.5 cursor-pointer hover:underline"
+              >
                 <span className="font-bold text-slate-800">
                   {user.followingCount ?? 0}
                 </span>
                 <span className="text-slate-400 text-xs">Mengikuti</span>
               </div>
-              <div className="flex items-center space-x-1.5 cursor-pointer hover:underline">
+
+              {/* 2. Tambahkan onClick untuk Pengikut (Followers) */}
+              <div
+                onClick={() => {
+                  setFollowsTab("followers");
+                  setIsFollowsOpen(true);
+                }}
+                className="flex items-center space-x-1.5 cursor-pointer hover:underline"
+              >
                 <span className="font-bold text-slate-800">
                   {user.followersCount ?? 0}
                 </span>
@@ -151,7 +164,7 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Daftar Postingan Personal Milik User */}
-          <div className="p-4 columns-1 sm:columns-2 gap-4">
+          <div className="p-4 columns-1 gap-4">
             {myThreads.length === 0 ? (
               <div className="col-span-full">
                 <p className="text-gray-400 text-sm py-12 text-center">
@@ -178,6 +191,13 @@ const Profile: React.FC = () => {
           isOpen={isEditOpen}
           onClose={() => setIsEditOpen(false)}
         />
+        {isFollowsOpen && (
+          <FollowsModal
+            isOpen={isFollowsOpen}
+            onClose={() => setIsFollowsOpen(false)}
+            initialTab={followsTab}
+          />
+        )}
       </div>
     </div>
   );

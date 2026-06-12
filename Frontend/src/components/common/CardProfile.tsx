@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { EditProfileModal } from "./EditProfileModal";
+import { getAvatarUrl } from "@/lib/utils";
 
 export const CardProfile: React.FC = () => {
   // jalankan hook untuk fetch profile secara otomatis
@@ -30,7 +31,7 @@ export const CardProfile: React.FC = () => {
                 src={
                   user.photoProfile.startsWith("http")
                     ? user.photoProfile
-                    : `http://localhost:3000/uploads/${user.photoProfile}`
+                    : getAvatarUrl(user.photoProfile)
                 }
                 alt={user.username}
               />
@@ -59,7 +60,7 @@ export const CardProfile: React.FC = () => {
           <p className="text-xs text-slate-400">@{user.username}</p>
         </div>
         {/* Bio (Diambil dinamis dari Redux) */}
-        <p className="mt-3 text-xs text-slate-600 leading-relaxed min-h-[16px]">
+        <p className="break-words mt-3 text-xs text-slate-600 leading-relaxed min-h-[16px] ">
           {loading ? (
             <span className="text-slate-300">Memuat bio...</span>
           ) : (

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
+import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
 import api from "@/lib/axios";
 
 interface EditProfileModalProps {
@@ -47,13 +48,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   }, [isOpen, user]);
 
   if (!user) return null;
-
-  // Heper URLl Avatar
-  const getAvatarUrl = (photo: string | null | undefined) => {
-    if (!photo) return undefined;
-    if (photo.startsWith("http")) return photo;
-    return `http://localhost:3000/uploads/${photo}`;
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,7 +109,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-2 w-full min-w-0">
           {/* Bagian Uploader Foto Profil */}
           <div className="flex items-center space-x-4">
             <div className="relative group">
@@ -179,7 +173,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tulis bio singkat..."
-              className="resize-none border-gray-200 focus:border-blue-400 focus:ring-blue-400 bg-white text-xs"
+              className="break-word resize-none border-gray-200 focus:border-blue-400 focus:ring-blue-400 bg-white text-xs"
               rows={3}
             />
           </div>

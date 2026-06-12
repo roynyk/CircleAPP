@@ -1,121 +1,189 @@
-import React from "react";
-import { TrendingUp, UserPlus, Flame } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { UserPlus, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { CardProfile } from "./CardProfile";
+import { getAvatarUrl } from "@/lib/utils";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/redux/store";
+import {
+  setSuggestedUsers,
+  toggleSuggestedUserFollow,
+} from "@/redux/authSlice"; // <-- Import toggle action
+import api from "@/lib/axios";
+import { toast } from "sonner";
+import TodaysNewsCard from "./TodaysNewsCard";
+import WhatsHappeningCard from "./WhatsHappeningCard";
 
 const RightBar: React.FC = () => {
-  const suggestedUsers = [
-    {
-      id: 1,
-      name: "Rian Pratama",
-      username: "rianpratama",
-      avatar:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
-      isOnline: true,
-    },
-    {
-      id: 2,
-      name: "Sarah Amanda",
-      username: "sarahamand",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop",
-      isOnline: true,
-    },
-    {
-      id: 3,
-      name: "Daffa Zaidan",
-      username: "daffazdn",
-      avatar:
-        "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop",
-      isOnline: false,
-    },
-  ];
+  const dispatch = useDispatch();
+  const suggestedUsers = useSelector(
+    (state: RootState) => state.auth.suggestedUsers,
+  );
+  const [loading, setLoading] = useState(true);
 
-  const trendingTopics = [
-    { tag: "#ReactJS_v19", posts: "12.4K postingan" },
-    { tag: "#TailwindCSS_v4", posts: "8.1K postingan" },
-    { tag: "#PrismaORM", posts: "3.2K postingan" },
-    { tag: "#CircleAPP", posts: "1.5K postingan" },
-  ];
+  // Fetch daftar rekomendasi user dari backend
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const response = await api.get("/users/suggested");
+        dispatch(setSuggestedUsers(response.data.data));
+      } catch (error) {
+        console.error("Gagal memuat rekomendasi user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [dispatch]);
+
+  // Fungsi toggle follow / unfollow
+  const handleFollowToggle = async (
+    targetId: number,
+    username: string,
+    isCurrentlyFollowed: boolean,
+  ) => {
+    try {
+      if (isCurrentlyFollowed) {
+        // Jika sudah di-follow, maka panggil API Unfollow
+        await api.delete(`/users/unfollow/${targetId}`); // Sesuaikan dengan endpoint unfollow kamu
+        toast.success(`Batal mengikuti @${username}`);
+      } else {
+        // Jika belum di-follow, maka panggil API Follow
+        await api.post(`/users/follow/${targetId}`); // Sesuaikan dengan endpoint follow kamu
+        toast.success(`Berhasil mengikuti @${username}`);
+      }
+
+      // Update status di Redux (akan langsung mengubah tampilan tombol)
+      dispatch(
+        toggleSuggestedUserFollow({ targetId, isFollow: !isCurrentlyFollowed }),
+      );
+    } catch (error) {
+      toast.error(
+        isCurrentlyFollowed
+          ? "Gagal batal mengikuti"
+          : "Gagal mengikuti pengguna",
+      );
+    }
+  };
 
   return (
-    <aside className="w-80 hidden lg:flex flex-col space-y-6 p-6 h-fit sticky top-6">
-      <CardProfile />
-      {/* Box 1: Rekomendasi User */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
-        <div className="flex items-center space-x-2 text-slate-800">
-          <UserPlus size={18} className="text-blue-500" />
-          <h2 className="font-bold text-sm tracking-wide">
-            Siapa untuk Diikuti
-          </h2>
+    <aside className="w-96 hidden lg:flex flex-col space-y-5 p-6 h-fit sticky bottom-6 self-end">
+      <TodaysNewsCard />
+      <WhatsHappeningCard />
+      <div className="bg-white/70 backdrop-blur-md border border-slate-100 shadow-sm rounded-2xl p-5 space-y-5">
+        <div className="flex items-center justify-between text-slate-800 border-b border-slate-100/80 pb-3">
+          <div className="flex items-center space-x-2">
+            <UserPlus size={18} className="text-blue-500" />
+            <h2 className="font-bold text-sm tracking-wide">
+              Siapa untuk Diikuti
+            </h2>
+          </div>
+          <Sparkles size={14} className="text-amber-500 animate-pulse" />
         </div>
 
-        <div className="space-y-3.5">
-          {suggestedUsers.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between group"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Avatar className="h-9 w-9 border border-slate-200 group-hover:border-blue-400 transition duration-300">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-slate-100 text-xs text-slate-700 font-semibold">
-                      {user.name[0]}
+        {loading ? (
+          <div className="space-y-4 py-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between animate-pulse"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="h-9 w-9 bg-slate-200 rounded-full"></div>
+                  <div className="space-y-1">
+                    <div className="h-3 w-24 bg-slate-200 rounded"></div>
+                    <div className="h-2 w-16 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+                <div className="h-7 w-14 bg-slate-200 rounded-lg"></div>
+              </div>
+            ))}
+          </div>
+        ) : suggestedUsers.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-4">
+            Tidak ada rekomendasi baru saat ini.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {suggestedUsers.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-2 -mx-2 hover:bg-slate-50/80 rounded-xl transition duration-200 group"
+              >
+                <div className="flex items-center space-x-3 min-w-0">
+                  <Avatar className="h-9 w-9 border border-slate-100 group-hover:border-blue-400/50 transition duration-300">
+                    <AvatarImage
+                      src={getAvatarUrl(user.photoProfile)}
+                      alt={user.fullName}
+                    />
+                    <AvatarFallback className="bg-blue-50 text-xs text-blue-600 font-bold uppercase">
+                      {user.fullName[0]}
                     </AvatarFallback>
                   </Avatar>
-                  {user.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse"></span>
-                  )}
+                  <div className="text-left min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition duration-150">
+                      {user.fullName}
+                    </p>
+                    <p className="text-[10px] text-slate-400 truncate">
+                      @{user.username}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left min-w-0">
-                  <p className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition duration-200">
-                    {user.name}
-                  </p>
-                  <p className="text-[10px] text-slate-500 truncate">
-                    @{user.username}
-                  </p>
-                </div>
-              </div>
 
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[10px] font-bold px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg cursor-pointer transition duration-150"
-              >
-                Ikuti
-              </Button>
-            </div>
-          ))}
-        </div>
+                {/* Tombol dengan Kondisional ClassName & Teks */}
+                <Button
+                  size="sm"
+                  variant={user.isFollowed ? "secondary" : "outline"}
+                  onClick={() =>
+                    handleFollowToggle(
+                      user.id,
+                      user.username,
+                      !!user.isFollowed,
+                    )
+                  }
+                  className={`h-7 text-[10px] font-bold px-3.5 rounded-lg cursor-pointer transition duration-200 ${
+                    user.isFollowed
+                      ? "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 hover:text-red-600 hover:border-red-200" // Hover berubah jadi merah tipis jika ingin batal
+                      : "border-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+                  }`}
+                >
+                  {user.isFollowed ? "Mengikuti" : "Ikuti"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Box 2: Topik Populer */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
-        <div className="flex items-center space-x-2 text-slate-800">
-          <Flame size={18} className="text-purple-500" />
-          <h2 className="font-bold text-sm tracking-wide">Tren Lingkaran</h2>
+      {/* 4. Render Footer Catatan Kaki */}
+      <div className="px-2 text-[9px] text-slate-400/80 leading-relaxed text-left space-y-1">
+        <div className="flex flex-wrap gap-x-2 gap-y-0.5 font-semibold">
+          <a href="#" className="hover:underline">
+            Terms of Service
+          </a>
+          <span>|</span>
+          <a href="#" className="hover:underline">
+            Privacy Policy
+          </a>
+          <span>|</span>
+          <a href="#" className="hover:underline">
+            Cookie Policy
+          </a>
+          <span>|</span>
+          <a href="#" className="hover:underline">
+            Accessibility
+          </a>
+          <span>|</span>
+          <a href="#" className="hover:underline">
+            Ads info
+          </a>
+          <span>|</span>
+          <a href="#" className="hover:underline">
+            More
+          </a>
         </div>
-
-        <div className="space-y-4">
-          {trendingTopics.map((topic, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center group cursor-pointer"
-            >
-              <div className="text-left min-w-0">
-                <p className="text-xs font-bold text-slate-800 group-hover:text-purple-600 transition duration-200 truncate">
-                  {topic.tag}
-                </p>
-                <p className="text-[10px] text-slate-400">{topic.posts}</p>
-              </div>
-              <TrendingUp
-                size={14}
-                className="text-slate-300 group-hover:text-purple-500 transition duration-300"
-              />
-            </div>
-          ))}
+        <div className="mt-1 font-bold text-[9px] text-slate-400/60">
+          © 2026 TalkHive Corp.
         </div>
       </div>
     </aside>

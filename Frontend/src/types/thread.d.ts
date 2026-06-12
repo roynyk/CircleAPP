@@ -38,3 +38,30 @@ export interface ThreadCardProps {
   onCardClick?: (threadId: number) => void;
   isDetail: boolean;
 }
+
+export interface SuggestedUser {
+  id: number;
+  username: string;
+  fullName: string;
+  photoProfile: string | null;
+  bio: string | null;
+}
+
+interface HoverUserData {
+  id: number;
+  username: string;
+  fullName: string;
+  photoProfile: string | null;
+  bio: string | null;
+  followingCount: number;
+  followersCount: number;
+  isFollowed: boolean;
+}
+
+interface UserFollow {
+  id: number;
+  username: string;
+  fullName: string;
+  photoProfile: string | null;
+  bio: string | null;
+}

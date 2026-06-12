@@ -10,6 +10,7 @@ import Header from "@/components/common/Header";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { toast } from "sonner";
+import { getAvatarUrl } from "@/lib/utils";
 
 const Home = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -59,11 +60,13 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      <div className="max-w-7xl w-full mx-auto px-4 py-6 flex items-start space-x-6 min-w-0">
-        <div className="flex-1 max-w-4xl w-full min-w-0 text-left">
+      <div className="max-w-[1375px] w-full mx-auto px-4 py-6 flex items-start space-x-6 min-w-0">
+        <div className="flex-1 max-w-5xl w-full min-w-0 text-left">
           <div className="p-6 border-b border-gray-200 flex space-x-4">
             <Avatar className="h-10 w-10">
-              {user?.photoProfile && <AvatarImage src={user.photoProfile} />}
+              {user?.photoProfile && (
+                <AvatarImage src={getAvatarUrl(user.photoProfile)} />
+              )}
               <AvatarFallback className="bg-blue-100 text-blue-600 font-bold uppercase">
                 {user?.fullName?.[0] || "U"}
               </AvatarFallback>

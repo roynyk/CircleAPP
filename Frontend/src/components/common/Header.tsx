@@ -6,8 +6,11 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut, Circle, Home, Compass, Search, User } from "lucide-react";
+import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
+import { useProfile } from "@/hooks/useProfile";
 
 const Header: React.FC = () => {
+  useProfile();
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,7 +40,7 @@ const Header: React.FC = () => {
         >
           <Circle className="h-6 w-6 fill-blue-600/10 group-hover:rotate-45 transition duration-500" />
           <span className="text-lg font-black tracking-wider text-slate-800">
-            CIRCLE<span className="text-blue-600">APP</span>
+            TALK<span className="text-blue-600">HIVE</span>
           </span>
         </Link>
 
@@ -78,11 +81,7 @@ const Header: React.FC = () => {
               <Avatar className="h-8 w-8 border border-blue-500/20 shadow-sm">
                 {user.photoProfile && (
                   <AvatarImage
-                    src={
-                      user.photoProfile.startsWith("http")
-                        ? user.photoProfile
-                        : `http://localhost:3000/uploads/${user.photoProfile}`
-                    }
+                    src={getAvatarUrl(user.photoProfile)}
                     alt={user.fullName}
                   />
                 )}

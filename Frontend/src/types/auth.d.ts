@@ -7,10 +7,12 @@ export interface User {
   bio?: string | null; // <--- Tambahkan Bio
   followingCount?: number; // <--- Tambahkan Jumlah Following
   followersCount?: number; // <--- Tambahkan Jumlah Followers
+  isFollowed?: boolean;
 }
 
 export interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  suggestedUsers: User[];
 }
