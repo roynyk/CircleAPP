@@ -4,11 +4,13 @@ import ThreadCard from "@/components/common/ThreadCard";
 interface ProfilePostsProps {
   postThreads: Thread[];
   toggleLike: (threadId: number) => void;
+  isProfile?: boolean;
 }
 
 export const ProfilePosts: React.FC<ProfilePostsProps> = ({
   postThreads,
   toggleLike,
+  isProfile = false,
 }) => {
   return (
     <div className="p-4 columns-1 gap-4">
@@ -25,6 +27,7 @@ export const ProfilePosts: React.FC<ProfilePostsProps> = ({
               thread={thread}
               onLikeToggle={toggleLike}
               isDetail={false}
+              isProfile={isProfile}
             />
           </div>
         ))

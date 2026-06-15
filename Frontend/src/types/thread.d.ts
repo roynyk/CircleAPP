@@ -8,7 +8,7 @@ export interface Creator {
 export interface Thread {
   id: number;
   content: string;
-  image?: string | null;
+  image?: string | null | undefined;
   created_at: string;
   user: Creator;
   likes: number;
@@ -36,7 +36,8 @@ export interface ThreadCardProps {
   thread: Thread;
   onLikeToggle?: (threadId: number) => void;
   onCardClick?: (threadId: number) => void;
-  isDetail: boolean;
+  isDetail?: boolean;
+  isProfile?: boolean;
 }
 
 export interface SuggestedUser {

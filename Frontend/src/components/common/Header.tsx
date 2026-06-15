@@ -6,7 +6,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Circle, Home, Compass, Search, User } from "lucide-react";
-import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
+import { getImageUrl } from "@/lib/utils"; // atau path ke file utility kamu
 import { useProfile } from "@/hooks/useProfile";
 
 const Header: React.FC = () => {
@@ -81,7 +81,7 @@ const Header: React.FC = () => {
               <Avatar className="h-8 w-8 border border-blue-500/20 shadow-sm">
                 {user.photoProfile && (
                   <AvatarImage
-                    src={getAvatarUrl(user.photoProfile)}
+                    src={getImageUrl(user.photoProfile)}
                     alt={user.fullName}
                   />
                 )}

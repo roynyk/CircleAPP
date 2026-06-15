@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { UserPlus, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import {
@@ -109,10 +110,13 @@ const RightBar: React.FC = () => {
                 key={user.id}
                 className="flex items-center justify-between p-2 -mx-2 hover:bg-slate-50/80 rounded-xl transition duration-200 group"
               >
-                <div className="flex items-center space-x-3 min-w-0">
+                <Link
+                  to={`/user/${user.id}`}
+                  className="flex items-center space-x-3 min-w-0 flex-1 cursor-pointer"
+                >
                   <Avatar className="h-9 w-9 border border-slate-100 group-hover:border-blue-400/50 transition duration-300">
                     <AvatarImage
-                      src={getAvatarUrl(user.photoProfile)}
+                      src={getImageUrl(user.photoProfile)}
                       alt={user.fullName}
                     />
                     <AvatarFallback className="bg-blue-50 text-xs text-blue-600 font-bold uppercase">
@@ -127,7 +131,7 @@ const RightBar: React.FC = () => {
                       @{user.username}
                     </p>
                   </div>
-                </div>
+                </Link>
 
                 {/* Tombol dengan Kondisional ClassName & Teks */}
                 <Button

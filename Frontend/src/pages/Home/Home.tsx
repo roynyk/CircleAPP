@@ -10,7 +10,7 @@ import Header from "@/components/common/Header";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { toast } from "sonner";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 
 const Home = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -45,6 +45,7 @@ const Home = () => {
   // Fungsi untuk mengirim postingan baru (POST /threads)
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // mencegah user mengisi postingan kosong dan mencegah user memosting spasi saja, karena pada dasarnya newPostContent.trim() itu nilainya false karena kosong, jadi tambahkan ! biar kondisinya true
     if (!newPostContent.trim() && !selectedImage) return;
 
@@ -64,7 +65,7 @@ const Home = () => {
           <div className="p-6 border-b border-gray-200 flex space-x-4">
             <Avatar className="h-10 w-10">
               {user?.photoProfile && (
-                <AvatarImage src={getAvatarUrl(user.photoProfile)} />
+                <AvatarImage src={getImageUrl(user.photoProfile)} />
               )}
               <AvatarFallback className="bg-blue-100 text-blue-600 font-bold uppercase">
                 {user?.fullName?.[0] || "U"}

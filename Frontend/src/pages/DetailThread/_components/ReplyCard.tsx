@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ReplyData } from "@/types/thread";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 
 interface ReplyCardProps {
   reply: ReplyData;
@@ -23,7 +23,7 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
       <Avatar className="h-8 w-8">
         {reply.user.photoProfile && (
           <AvatarImage
-            src={getAvatarUrl(reply.user.photoProfile)}
+            src={getImageUrl(reply.user.photoProfile)}
             alt={reply.user.username}
           />
         )}
@@ -56,7 +56,7 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
         {reply.image && (
           <div className="mmt-3 rounded-xl overflow-hidden border border-gray-100 max-h-80 w-fit max-w-full mt-2">
             <img
-              src={getAvatarUrl(reply.image)} // Arahkan ke folder static uploads backend
+              src={getImageUrl(reply.image)} // Arahkan ke folder static uploads backend
               alt="Reply attachment"
               className="max-h-80 w-auto object-cover rounded-xl"
             />

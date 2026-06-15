@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import api from "@/lib/axios";
 
 interface EditProfileModalProps {
@@ -119,7 +119,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 ) : (
                   user.photoProfile && (
                     <AvatarImage
-                      src={getAvatarUrl(user.photoProfile)}
+                      src={getImageUrl(user.photoProfile)}
                       alt={user.username}
                     />
                   )
@@ -145,7 +145,9 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-700">Profile Picture</p>
+              <p className="text-xs font-bold text-slate-700">
+                Profile Picture
+              </p>
               <p className="text-[10px] text-slate-400 mt-0.5">
                 Click avatar to change image.
               </p>

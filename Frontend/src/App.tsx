@@ -13,6 +13,7 @@ import DetailThread from "./pages/DetailThread/DetailThread";
 import { Provider, useSelector } from "react-redux";
 import { store, RootState } from "./redux/store";
 import { Toaster } from "@/components/ui/sonner";
+import UserProfile from "./pages/UserProfile/UserProfile";
 
 //Hanya izinkan masuk jika sudah terautentikasi (login)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -87,7 +88,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/user/:id"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
           {/* Halaman Default (Redirect ke login) */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

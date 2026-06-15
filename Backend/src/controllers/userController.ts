@@ -311,3 +311,55 @@ export const searchUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getThreadsByUserId = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.userId as string, 10);
+    const loggedInUserId = (req as any).user?.id;
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "ID User tidak valid" });
+    }
+
+    const threads = await prisma.thread.findMany({
+      where: { createdById: userId }, // Saring postingan berdasarkan pembuatnya
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            photoProfile: true,
+          },
+        },
+        likes: { select: { userId: true } },
+        replies: { select: { id: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formattedThreads = threads.map((thread) => ({
+      id: thread.id,
+      content: thread.content,
+      image: thread.image,
+      user: {
+        id: thread.creator.id,
+        username: thread.creator.username,
+        name: thread.creator.fullName,
+        photoProfile: thread.creator.photoProfile,
+      },
+      created_at: thread.createdAt,
+      likes: thread.likes.length,
+      reply: thread.replies.length,
+      isLiked: loggedInUserId
+        ? thread.likes.some((l) => l.userId === loggedInUserId)
+        : false,
+    }));
+
+    return res.status(200).json({ data: formattedThreads });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Gagal mengambil postingan user: ${error}` });
+  }
+};

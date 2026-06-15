@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { HoverUserData } from "@/types/thread";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import { useDispatch } from "react-redux";
 import { toggleSuggestedUserFollow } from "@/redux/authSlice";
 
@@ -104,7 +104,7 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
             <div className="flex justify-between items-start">
               <Avatar className="h-12 w-12 border border-slate-100">
                 <AvatarImage
-                  src={getAvatarUrl(userData.photoProfile)}
+                  src={getImageUrl(userData.photoProfile)}
                   alt={userData.fullName}
                 />
                 <AvatarFallback className="bg-blue-50 text-blue-600 font-bold uppercase text-base">

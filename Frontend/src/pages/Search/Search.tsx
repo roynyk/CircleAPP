@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import RightBar from "@/components/common/RightBar";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search as SearchIcon, Sparkles } from "lucide-react";
 import api from "@/lib/axios";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ProfileHoverCard } from "@/components/common/ProfileHoverCard";
 import { SearchedUser } from "@/types/user";
@@ -103,30 +104,32 @@ const Search: React.FC = () => {
               <div className="space-y-3">
                 {results.map((user) => (
                   <ProfileHoverCard key={user.id} userId={user.id}>
-                    <div className="flex items-center space-x-3 p-3 border border-slate-100 hover:border-blue-100 hover:bg-blue-50/10 rounded-xl transition duration-200 group">
-                      <Avatar className="h-10 w-10 border border-slate-100 group-hover:border-blue-400/30 transition duration-300">
-                        <AvatarImage
-                          src={getAvatarUrl(user.photoProfile)}
-                          alt={user.fullName}
-                        />
-                        <AvatarFallback className="bg-blue-50 text-blue-600 text-sm font-bold uppercase">
-                          {user.fullName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="text-left min-w-0">
-                        <p className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition duration-150">
-                          {user.fullName}
-                        </p>
-                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                          @{user.username}
-                        </p>
-                        {user.bio && (
-                          <p className="text-[10px] text-slate-500 truncate mt-1 max-w-[280px]">
-                            {user.bio}
+                    <Link to={`/user/${user.id}`} className="block cursor-pointer">
+                      <div className="flex items-center space-x-3 p-3 border border-slate-100 hover:border-blue-100 hover:bg-blue-50/10 rounded-xl transition duration-200 group">
+                        <Avatar className="h-10 w-10 border border-slate-100 group-hover:border-blue-400/30 transition duration-300">
+                          <AvatarImage
+                            src={getImageUrl(user.photoProfile)}
+                            alt={user.fullName}
+                          />
+                          <AvatarFallback className="bg-blue-50 text-blue-600 text-sm font-bold uppercase">
+                            {user.fullName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-left min-w-0">
+                          <p className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition duration-150">
+                            {user.fullName}
                           </p>
-                        )}
+                          <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                            @{user.username}
+                          </p>
+                          {user.bio && (
+                            <p className="text-[10px] text-slate-500 truncate mt-1 max-w-[280px]">
+                              {user.bio}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                   </ProfileHoverCard>
                 ))}
               </div>

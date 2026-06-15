@@ -8,7 +8,6 @@ import {
   incrementReplyCount,
 } from "@/redux/threadSlice";
 import api from "@/lib/axios";
-import { Thread } from "@/types/thread";
 import { toast } from "sonner";
 
 export const useThreads = () => {
@@ -76,43 +75,30 @@ export const useThreads = () => {
   const createThread = async (content: string, image: File | null) => {
     setIsPosting(true);
     try {
+      //#region
       // kenapa pake FormData?? karena kita mau menghandle request untuk file juga, jadi sebelumnya kan datanya hanya bentuk JSON/teks aja, nah JSON tuh gabisa menampung file, jadi data yang sebelumnya JSON kita masukkan ke FormData agar filenya juga bisa ikut di kirim ke backend
+      //#endregion
       const formData = new FormData();
       formData.append("content", content);
 
+      //#region
       // untuk penggunaan 'image' itu harus sama dengan fieldname nya yang ada di backend, karena aku menggunakan upload.single("image") maka harus di append dengan fieldname yang sama
+      //#endregion
       if (image) {
         formData.append("image", image);
       }
 
-      // 2. Kirim request dengan header multipart/form-data
+      // Kirim request dengan header multipart/form-data
       const response = await api.post("/threads/create", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      // di consume data yang dari backend karena kan proses response di atas itu pake async await, jadi harus nunggu selesai dulu baru ini di eksekusi
       const createdThread = response.data.data;
 
-      // Mapping data baru agar formatnya sesuai dengan tipe data Thread di Frontend
-      const formattedNewThread: Thread = {
-        id: createdThread.id,
-        content: createdThread.content,
-        image: createdThread.image,
-        created_at: createdThread.created_at,
-        user: {
-          id: user?.id || 0,
-          username: user?.username || "",
-          name: user?.fullName || "",
-          photoProfile: user?.photoProfile || null,
-        },
-        likes: 0,
-        reply: 0,
-        isLiked: false,
-      };
       // Taruh postingan baru di urutan paling atas feed
-      dispatch(setThreads([formattedNewThread, ...threads]));
+      dispatch(setThreads([createdThread, ...threads]));
       return true;
     } catch (err) {
       console.error(err);

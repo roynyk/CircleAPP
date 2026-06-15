@@ -38,7 +38,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
     e.preventDefault();
 
     // Cegah submit jika teks kosong atau sedang dalam proses pengiriman
-    if (!content.trim() && selectedImage) return;
+    if (!content.trim() && !selectedImage) return;
 
     // Jalankan fungsi kirim ke API yang dikirim dari halaman utama
     await onSubmit(content, selectedImage);

@@ -72,6 +72,74 @@ export const createThread = async (req: Request, res: Response) => {
   }
 };
 
+export const updateThread = async (req: Request, res: Response) => {
+  try {
+    const threadId = parseInt(req.params.id as string, 10);
+    const userId = (req as any).user.id;
+    const { content, removeImage } = req.body;
+    let image: string | null | undefined = req.file
+      ? req.file.filename
+      : undefined;
+
+    if (removeImage === "true") {
+      image = null;
+    }
+    const thread = await prisma.thread.findUnique({
+      where: { id: threadId },
+    });
+
+    if (!thread) {
+      return res.status(404).json({ message: "Thread is not found" });
+    }
+
+    if (thread.createdById !== userId) {
+      return res.status(403).json({
+        message: "You're not allowed to edit this thread",
+      });
+    }
+
+    const updatedThread = await prisma.thread.update({
+      where: { id: threadId },
+      data: {
+        content: content !== undefined ? content : thread.content,
+        image: image !== undefined ? image : thread.image,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            photoProfile: true,
+          },
+        },
+      },
+    });
+
+    const formattedThread = {
+      id: updatedThread.id,
+      content: updatedThread.content,
+      image: updatedThread.image,
+      created_at: updatedThread.createdAt,
+      user: {
+        id: updatedThread.creator.id,
+        username: updatedThread.creator.username,
+        name: updatedThread.creator.fullName,
+        photoProfile: updatedThread.creator.photoProfile,
+      },
+    };
+
+    return res.status(200).json({
+      message: "Successfully to edit a Thread",
+      data: formattedThread,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Failed to edit a thread ${error}`,
+    });
+  }
+};
+
 export const getThreads = async (req: Request, res: Response) => {
   try {
     const loggedInUserId = (req as any).user?.id;

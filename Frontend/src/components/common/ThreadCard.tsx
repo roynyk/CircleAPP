@@ -1,17 +1,21 @@
-import React from "react";
 import { ThreadCardProps } from "@/types/thread";
-import { Heart, MessageCircle } from "lucide-react";
+import { Edit3, Heart, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { ProfileHoverCard } from "./ProfileHoverCard";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useState } from "react";
+import { EditThreadModal } from "@/pages/Profile/_components/EditThreadModal";
 
 // React.FC itu singkatan dari React Functional Component Ini adalah sebuah Tipe Data Bawaan dari TypeScript yang khusus digunakan untuk memberi tahu editor bahwa fungsi/variabel yang sedang kita buat ini adalah sebuah Komponen React (bukan fungsi javascript biasa).
 const ThreadCard: React.FC<ThreadCardProps> = ({
   thread,
   onLikeToggle,
   isDetail = false,
+  isProfile,
 }) => {
   //Mengubah tanggal yang amberadul di database menjadi Format tanggal postingan (misal: 4 Jun 2026)
   const formatDate = (dateString: string) => {
@@ -23,22 +27,47 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
     return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   // Content card body
   const CardBody = (
     <>
       {/* Header Kartu (Nama, Username, Tanggal) */}
       <div className="flex items-center space-x-2">
         <ProfileHoverCard userId={thread.user.id}>
-          <span className="font-bold text-gray-900 text-sm hover:underline">
-            {thread.user.name}
-          </span>
-          <span className="text-xs text-gray-500">@{thread.user.username}</span>
+          <Link
+            to={`/user/${thread.user.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center space-x-2"
+          >
+            <span className="font-bold text-gray-900 text-sm hover:underline">
+              {thread.user.name}
+            </span>
+            <span className="text-xs text-gray-500">
+              @{thread.user.username}
+            </span>
+          </Link>
         </ProfileHoverCard>
         <span className="text-gray-300 text-xs">•</span>
         <span className="text-xs text-gray-500">
           {formatDate(thread.created_at)}
         </span>
       </div>
+
+      {/* Tampilkan tombol edit HANYA JIKA di halaman profil DAN ini milik user yang login */}
+      {isProfile && thread.user.id === currentUser?.id && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsEditOpen(true);
+          }}
+          className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-blue-600 transition ml-auto cursor-pointer"
+          title="Edit Post"
+        >
+          <Edit3 size={14} />
+        </button>
+      )}
       {/* Isi Tulisan Postingan */}
       <p className="mt-1.5 text-sm text-gray-800 whitespace-pre-line leading-relaxed break-words">
         {thread.content}
@@ -48,7 +77,7 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
       {thread.image && (
         <div className="mmt-3 rounded-xl overflow-hidden border border-gray-100 max-h-80 w-fit max-w-full mt-2">
           <img
-            src={getAvatarUrl(thread.image)}
+            src={getImageUrl(thread.image)}
             alt="Thread attachment"
             className="max-h-80 w-auto object-cover rounded-xl"
           />
@@ -57,79 +86,91 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
     </>
   );
   return (
-    <Card className="w-full bg-white border border-gray-100/80 rounded-2xl shadow-sm hover:shadow-md transition duration-300 text-left">
-      <CardContent className="p-4 flex space-x-3">
-        <div className="flex-shrink-0 self-start">
-          <ProfileHoverCard userId={thread.user.id}>
-            <Avatar
-              className="h-9 w-9 cursor-pointer overflow-hidden rounded-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {thread.user.photoProfile ? (
-                <AvatarImage
-                  src={
-                    thread.user.photoProfile.startsWith("http")
-                      ? thread.user.photoProfile
-                      : getAvatarUrl(thread.user.photoProfile)
-                  }
-                  alt={thread.user.username}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-bold uppercase w-full h-full flex items-center justify-center">
-                  {thread.user.name[0]}
-                </AvatarFallback>
-              )}
-            </Avatar>
-          </ProfileHoverCard>
-        </div>
-        <div className="flex-1 min-w-0">
-          {/* KONDISI: Jika halaman detail, tampilkan isi biasa. Jika feed, bungkus dengan <Link> */}
-          {isDetail ? (
-            <div>{CardBody}</div>
-          ) : (
-            <Link
-              to={`/thread/${thread.id}`}
-              className="block hover:no-underline"
-            >
-              {CardBody}
-            </Link>
-          )}
-          {/* Tombol Aksi (Di luar Link) */}
-          <div className="mt-3 flex items-center space-x-6 text-gray-500">
-            <button
-              onClick={() => onLikeToggle && onLikeToggle(thread.id)}
-              className="flex items-center space-x-1.5 text-xs hover:text-red-500 transition cursor-pointer"
-            >
-              {thread.isLiked ? (
-                <Heart
-                  size={16}
-                  className="fill-red-500 text-red-500 animate-pulse"
-                />
-              ) : (
-                <Heart size={16} />
-              )}
-              <span>{thread.likes}</span>
-            </button>
+    <>
+      <Card className="w-full bg-white border border-gray-100/80 rounded-2xl shadow-sm hover:shadow-md transition duration-300 text-left">
+        <CardContent className="p-4 flex space-x-3">
+          <div className="flex-shrink-0 self-start">
+            <ProfileHoverCard userId={thread.user.id}>
+              <Link
+                to={`/user/${thread.user.id}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Avatar className="h-9 w-9 cursor-pointer overflow-hidden rounded-full">
+                  {thread.user.photoProfile ? (
+                    <AvatarImage
+                      src={
+                        thread.user.photoProfile.startsWith("http")
+                          ? thread.user.photoProfile
+                          : getImageUrl(thread.user.photoProfile)
+                      }
+                      alt={thread.user.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-bold uppercase w-full h-full flex items-center justify-center">
+                      {thread.user.name[0]}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </Link>
+            </ProfileHoverCard>
+          </div>
+          <div className="flex-1 min-w-0">
+            {/* KONDISI: Jika halaman detail, tampilkan isi biasa. Jika feed, bungkus dengan <Link> */}
             {isDetail ? (
-              <div>
-                <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
-                  <MessageCircle size={16} />
-                  <span>{thread.reply}</span>
-                </button>
-              </div>
+              <div>{CardBody}</div>
             ) : (
-              <Link to={`/thread/${thread.id}`}>
-                <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
-                  <MessageCircle size={16} />
-                  <span>{thread.reply}</span>
-                </button>
+              <Link
+                to={`/thread/${thread.id}`}
+                className="block hover:no-underline"
+              >
+                {CardBody}
               </Link>
             )}
+            {/* Tombol Aksi (Di luar Link) */}
+            <div className="mt-3 flex items-center space-x-6 text-gray-500">
+              <button
+                onClick={() => onLikeToggle && onLikeToggle(thread.id)}
+                className="flex items-center space-x-1.5 text-xs hover:text-red-500 transition cursor-pointer"
+              >
+                {thread.isLiked ? (
+                  <Heart
+                    size={16}
+                    className="fill-red-500 text-red-500 animate-pulse"
+                  />
+                ) : (
+                  <Heart size={16} />
+                )}
+                <span>{thread.likes}</span>
+              </button>
+
+              {isDetail ? (
+                <div>
+                  <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
+                    <MessageCircle size={16} />
+                    <span>{thread.reply}</span>
+                  </button>
+                </div>
+              ) : (
+                <Link to={`/thread/${thread.id}`}>
+                  <button className="flex items-center space-x-1.5 text-xs hover:text-blue-500 transition cursor-pointer">
+                    <MessageCircle size={16} />
+                    <span>{thread.reply}</span>
+                  </button>
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      {isProfile && thread.user.id === currentUser?.id && (
+        <EditThreadModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          thread={thread}
+        />
+      )}
+    </>
   );
 };
 

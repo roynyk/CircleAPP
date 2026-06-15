@@ -26,6 +26,7 @@ export const ProfileLikes: React.FC<ProfileLikesProps> = ({
               thread={thread}
               onLikeToggle={toggleLike}
               isDetail={false}
+              isProfile={true}
             />
           </div>
         ))

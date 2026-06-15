@@ -41,8 +41,31 @@ const threadSlice = createSlice({
         thread.reply = (thread.reply || 0) + 1;
       }
     },
+    updateThread: (state, action: PayloadAction<Thread>) => {
+      const updateThread = action.payload;
+      const index = state.threads.findIndex(
+        (thread) => thread.id === updateThread.id,
+      );
+      //#region
+      //Di dalam bahasa pemrograman JavaScript/TypeScript, fungsi .findIndex() memiliki aturan baku:
+      // Jika data yang dicari ditemukan, ia akan mengembalikan posisi indeksnya (0, 1, 2, dst).
+      // Jika data yang dicari TIDAK ditemukan (misal karena ID-nya tidak cocok dengan semua data di array), ia akan mengembalikan angka -1.
+      // Timpa data thread lama dengan data baru dari backend
+      //#endregion
+      if (index !== -1) {
+        state.threads[index] = {
+          ...state.threads[index],
+          ...updateThread,
+        };
+      }
+    },
   },
 });
-export const { setThreads, addThread, toggleLikeRedux, incrementReplyCount } =
-  threadSlice.actions;
+export const {
+  setThreads,
+  addThread,
+  toggleLikeRedux,
+  incrementReplyCount,
+  updateThread,
+} = threadSlice.actions;
 export default threadSlice.reducer;

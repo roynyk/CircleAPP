@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageCircle } from "lucide-react";
 import { Thread } from "@/types/thread";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 
 interface ProfileMediaProps {
   mediaThreads: Thread[];
@@ -25,7 +25,7 @@ export const ProfileMedia: React.FC<ProfileMediaProps> = ({ mediaThreads }) => {
             className="relative aspect-square rounded-xl overflow-hidden group border border-slate-100 shadow-sm cursor-pointer"
           >
             <img
-              src={getAvatarUrl(thread.image!)}
+              src={getImageUrl(thread.image!)}
               alt="Media postingan"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
             />

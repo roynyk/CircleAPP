@@ -8,7 +8,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import api from "@/lib/axios";
 import { UserFollow } from "@/types/thread";
-import { getAvatarUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 
 interface FollowsModalProps {
   isOpen: boolean;
@@ -129,7 +129,7 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
                 >
                   <Avatar className="h-9 w-9 border border-slate-100">
                     <AvatarImage
-                      src={getAvatarUrl(item.photoProfile)}
+                      src={getImageUrl(item.photoProfile)}
                       alt={item.fullName}
                     />
                     <AvatarFallback className="bg-blue-50 text-blue-600 text-xs font-bold uppercase">

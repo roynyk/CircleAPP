@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import Header from "@/components/common/Header";
@@ -6,44 +6,126 @@ import RightBar from "@/components/common/RightBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Calendar, LinkIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useThreads } from "@/hooks/useThreads";
-import { EditProfileModal } from "./_components/EditProfileModal";
-import { FollowsModal } from "./_components/FollowsModal";
 import { getImageUrl } from "@/lib/utils";
 import { ProfileMedia } from "@/pages/Profile/_components/ProfileMedia";
-import { ProfileLikes } from "@/pages/Profile/_components/ProfileLikes";
 import { ProfilePosts } from "@/pages/Profile/_components/ProfilePosts";
+import api from "@/lib/axios";
+import { toast } from "sonner";
+import { User } from "@/types/auth";
 
-const Profile: React.FC = () => {
-  // Mengambil data user yang sedang login dari Redux (Retrieve data profile from Redux)
-  const user = useSelector((state: RootState) => state.auth.user);
-
-  // Mengambil data threads global dari Redux
-  const threads = useSelector((state: RootState) => state.threads.threads);
-  const { toggleLike } = useThreads();
+const UserProfile: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isFollowsOpen, setIsFollowsOpen] = useState(false);
-  const [followsTab, setFollowsTab] = useState<"followers" | "following">(
-    "followers",
-  );
-  const [activeTab, setActiveTab] = useState<"posts" | "media" | "likes">(
-    "posts",
-  );
-  if (!user) return null;
+  const { toggleLike } = useThreads();
 
-  const likedThreads = threads.filter((thread) => thread.isLiked);
-  const myThreads = threads.filter((thread) => thread.user.id === user.id);
-  const mediaThreads = myThreads.filter((thread) => thread.image);
+  const loggedInUser = useSelector((state: RootState) => state.auth.user);
+
+  // State untuk data profil user lain & postingan mereka
+  const [user, setUser] = useState<User | null>(null);
+  const [userThreads, setUserThreads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [activeTab, setActiveTab] = useState<"posts" | "media">("posts");
+
+  // Arahkan ke /profile jika ID di URL ternyata adalah ID kita sendiri
+  useEffect(() => {
+    if (id && loggedInUser && parseInt(id) === loggedInUser.id) {
+      navigate("/profile");
+    }
+  }, [id, loggedInUser, navigate]);
+
+  // Fetch profil dan postingan user target
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const userRes = await api.get(`/users/${id}`);
+        setUser(userRes.data.data);
+
+        const threadsRes = await api.get(`/users/user/${id}`);
+        setUserThreads(threadsRes.data.data);
+      } catch (err: any) {
+        console.error(err);
+        toast.error("Gagal memuat profil pengguna.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [id]);
+
+  const handleFollowToggle = async () => {
+    if (!user) return;
+    try {
+      if (user.isFollowed) {
+        await api.delete(`/users/unfollow/${user.id}`);
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                isFollowed: false,
+                followersCount: Math.max(0, (prev.followersCount ?? 0) - 1),
+              }
+            : null,
+        );
+        toast.success(`Batal mengikuti @${user.username}`);
+      } else {
+        await api.post(`/users/follow/${user.id}`);
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                isFollowed: true,
+                followersCount: (prev.followersCount ?? 0) + 1,
+              }
+            : null,
+        );
+        toast.success(`Mengikuti @${user.username}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal mengubah status mengikuti");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-semibold text-sm">
+            Memuat profil...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-semibold text-sm">
+            Pengguna tidak ditemukan.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const mediaThreads = userThreads.filter((thread) => thread.image);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex items-start space-x-6 min-w-0">
-        {/* Kolom Kiri: Informasi Profil & Postingan User */}
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex items-start space-x-6 min-w-0 pb-20 md:pb-6">
         <div className="flex-1 max-w-4xl w-full min-w-0 bg-white rounded-xl shadow-md overflow-hidden text-left">
-          {/* Header Atas (Tombol Kembali) */}
+          {/* Header */}
           <div className="p-4 border-b border-gray-100 flex items-center space-x-4">
             <button
               onClick={() => navigate(-1)}
@@ -56,17 +138,16 @@ const Profile: React.FC = () => {
                 {user.fullName}
               </h2>
               <p className="text-xs text-gray-400">
-                {myThreads.length} Postingan
+                {userThreads.length} Postingan
               </p>
             </div>
           </div>
 
-          {/* Banner Profil (Gradient Premium) */}
+          {/* Banner */}
           <div className="h-44 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 relative" />
 
-          {/* Konten Utama Profil */}
+          {/* Konten */}
           <div className="px-6 pb-6 relative">
-            {/* Foto Profil Besar Overlapping */}
             <div className="absolute -top-16 left-6">
               <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
                 {user.photoProfile && (
@@ -81,18 +162,21 @@ const Profile: React.FC = () => {
               </Avatar>
             </div>
 
-            {/* Tombol Edit Profile (Masih statik/tombol biasa dulu) */}
+            {/* Tombol Follow / Following */}
             <div className="flex justify-end pt-4">
               <Button
-                onClick={() => setIsEditOpen(true)}
-                variant="outline"
-                className="h-9 font-bold px-5 text-slate-700 border-slate-200 hover:bg-slate-50 rounded-full cursor-pointer text-xs"
+                onClick={handleFollowToggle}
+                variant={user.isFollowed ? "outline" : "default"}
+                className={`h-9 font-bold px-6 rounded-full cursor-pointer text-xs ${
+                  user.isFollowed
+                    ? "text-slate-700 border-slate-200 hover:bg-slate-50"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
               >
-                Edit Profile
+                {user.isFollowed ? "Following" : "Follow"}
               </Button>
             </div>
 
-            {/* Nama & Username */}
             <div className="mt-4">
               <h1 className="text-xl font-extrabold text-slate-800 leading-tight">
                 {user.fullName}
@@ -100,12 +184,10 @@ const Profile: React.FC = () => {
               <p className="text-sm text-slate-400">@{user.username}</p>
             </div>
 
-            {/* Bio User (Diambil langsung dari Redux) */}
             <p className="mt-3.5 text-sm text-slate-600 leading-relaxed break-words">
               {user.bio || "Belum ada bio."}
             </p>
 
-            {/* Meta Info Tambahan */}
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
               <div className="flex items-center space-x-1">
                 <MapPin size={14} />
@@ -123,30 +205,15 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            {/* Statistik Followers / Following */}
             <div className="mt-4 flex items-center space-x-5 pt-4 border-t border-slate-100 text-sm">
-              {/* 1. Tambahkan onClick untuk Mengikuti (Following) */}
-              <div
-                onClick={() => {
-                  setFollowsTab("following");
-                  setIsFollowsOpen(true);
-                }}
-                className="flex items-center space-x-1.5 cursor-pointer hover:underline"
-              >
+              <div className="flex items-center space-x-1.5">
                 <span className="font-bold text-slate-800">
                   {user.followingCount ?? 0}
                 </span>
                 <span className="text-slate-400 text-xs">Mengikuti</span>
               </div>
 
-              {/* 2. Tambahkan onClick untuk Pengikut (Followers) */}
-              <div
-                onClick={() => {
-                  setFollowsTab("followers");
-                  setIsFollowsOpen(true);
-                }}
-                className="flex items-center space-x-1.5 cursor-pointer hover:underline"
-              >
+              <div className="flex items-center space-x-1.5">
                 <span className="font-bold text-slate-800">
                   {user.followersCount ?? 0}
                 </span>
@@ -155,7 +222,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Menu Tab Profil */}
+          {/* Tab Menu (Tanpa Likes) */}
           <div className="border-b border-gray-100 flex text-center text-sm font-semibold text-gray-500">
             <button
               onClick={() => setActiveTab("posts")}
@@ -177,46 +244,24 @@ const Profile: React.FC = () => {
             >
               Media
             </button>
-            <button
-              onClick={() => setActiveTab("likes")}
-              className={`flex-1 py-3 border-b-2 font-bold transition duration-200 cursor-pointer ${
-                activeTab === "likes"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-slate-700"
-              }`}
-            >
-              Likes
-            </button>
           </div>
 
-          {/* Daftar Postingan Personal Milik User */}
+          {/* Posts list (isProfile set ke false agar tombol edit/delete thread tidak muncul) */}
           {activeTab === "posts" && (
-            <ProfilePosts postThreads={myThreads} toggleLike={toggleLike} isProfile={true} />
+            <ProfilePosts
+              postThreads={userThreads}
+              toggleLike={toggleLike}
+              isProfile={false}
+            />
           )}
           {activeTab === "media" && (
             <ProfileMedia mediaThreads={mediaThreads} />
           )}
-          {activeTab === "likes" && (
-            <ProfileLikes likedThreads={likedThreads} toggleLike={toggleLike} />
-          )}
         </div>
-
-        {/* Kolom Kanan */}
         <RightBar />
-        <EditProfileModal
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-        />
-        {isFollowsOpen && (
-          <FollowsModal
-            isOpen={isFollowsOpen}
-            onClose={() => setIsFollowsOpen(false)}
-            initialTab={followsTab}
-          />
-        )}
       </div>
     </div>
   );
 };
 
-export default Profile;
+export default UserProfile;
