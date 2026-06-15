@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/authSlice";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Circle, Home, Compass, Search, User } from "lucide-react";
 import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
 import { useProfile } from "@/hooks/useProfile";
@@ -99,7 +99,7 @@ const Header: React.FC = () => {
             className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl cursor-pointer flex items-center space-x-2 h-9 px-3 transition duration-200"
           >
             <LogOut size={15} />
-            <span className="text-xs font-bold hidden sm:inline">Keluar</span>
+            <span className="text-xs font-bold hidden sm:inline">Log Out</span>
           </Button>
         </div>
       </div>

@@ -74,9 +74,6 @@ export const useThreadDetail = (threadIdString: string | undefined) => {
             return [newReply, ...prevReplies];
           });
 
-          // Update counter reply di Redux
-          dispatch(incrementReplyCount(threadId));
-
           toast.info("Balasan Baru!", {
             description: `${newReply.user.name} baru saja membalas postingan ini.`,
           });
@@ -100,7 +97,6 @@ export const useThreadDetail = (threadIdString: string | undefined) => {
       await api.post(`/threads/${threadId}/like`);
     } catch (err) {
       console.error(err);
-      dispatch(toggleLikeRedux(threadId)); // Rollback jika gagal
       toast.error("Gagal menyukai postingan");
     }
   };
@@ -122,16 +118,7 @@ export const useThreadDetail = (threadIdString: string | undefined) => {
       const newReply = response.data.data;
 
       const formattedNewReply: ReplyData = {
-        id: newReply.id,
-        content: newReply.content,
-        created_at: newReply.created_at,
-        image: newReply.image,
-        user: {
-          id: user?.id || 0,
-          username: user?.username || "",
-          name: user?.fullName || "",
-          photoProfile: user?.photoProfile || null,
-        },
+        ...newReply,
         likes: 0,
         reply: 0,
       };

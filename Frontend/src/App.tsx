@@ -4,15 +4,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import Home from "./pages/Home/Home";
+import Profile from "./pages/Profile/Profile";
+import Search from "./pages/Search/Search";
+import DetailThread from "./pages/DetailThread/DetailThread";
 import { Provider, useSelector } from "react-redux";
 import { store, RootState } from "./redux/store";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Home from "./pages/Home";
-import Profile from "./pages/Profile";
-import DetailThread from "./pages/DetailThread";
 import { Toaster } from "@/components/ui/sonner";
-import Search from "./pages/Search";
 
 //Hanya izinkan masuk jika sudah terautentikasi (login)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

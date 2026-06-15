@@ -3,21 +3,23 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import Header from "@/components/common/Header";
 import RightBar from "@/components/common/RightBar";
-import ThreadCard from "@/components/common/ThreadCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Calendar, LinkIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useThreads } from "@/hooks/useThreads";
-import { EditProfileModal } from "@/components/common/EditProfileModal";
-import { FollowsModal } from "@/components/common/FollowsModal";
+import { EditProfileModal } from "./_components/EditProfileModal";
+import { FollowsModal } from "./_components/FollowsModal";
 import { getAvatarUrl } from "@/lib/utils";
+import { ProfileMedia } from "@/pages/Profile/_components/ProfileMedia";
+import { ProfileLikes } from "@/pages/Profile/_components/ProfileLikes";
+import { ProfilePosts } from "@/pages/Profile/_components/ProfilePosts";
 
 const Profile: React.FC = () => {
-  // 1. Mengambil data user yang sedang login dari Redux (Retrieve data profile from Redux)
+  // Mengambil data user yang sedang login dari Redux (Retrieve data profile from Redux)
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // 2. Mengambil data threads global dari Redux
+  // Mengambil data threads global dari Redux
   const threads = useSelector((state: RootState) => state.threads.threads);
   const { toggleLike } = useThreads();
   const navigate = useNavigate();
@@ -26,11 +28,14 @@ const Profile: React.FC = () => {
   const [followsTab, setFollowsTab] = useState<"followers" | "following">(
     "followers",
   );
-
+  const [activeTab, setActiveTab] = useState<"posts" | "media" | "likes">(
+    "posts",
+  );
   if (!user) return null;
 
-  // Filter postingan agar HANYA menampilkan milik user yang sedang aktif saat ini
+  const likedThreads = threads.filter((thread) => thread.isLiked);
   const myThreads = threads.filter((thread) => thread.user.id === user.id);
+  const mediaThreads = myThreads.filter((thread) => thread.image);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -152,37 +157,48 @@ const Profile: React.FC = () => {
 
           {/* Menu Tab Profil */}
           <div className="border-b border-gray-100 flex text-center text-sm font-semibold text-gray-500">
-            <button className="flex-1 py-3 border-b-2 border-blue-500 text-blue-600 font-bold transition">
-              Postingan
+            <button
+              onClick={() => setActiveTab("posts")}
+              className={`flex-1 py-3 border-b-2 font-bold transition duration-200 cursor-pointer ${
+                activeTab === "posts"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-slate-700"
+              }`}
+            >
+              Posts
             </button>
-            <button className="flex-1 py-3 hover:text-slate-700 transition">
+            <button
+              onClick={() => setActiveTab("media")}
+              className={`flex-1 py-3 border-b-2 font-bold transition duration-200 cursor-pointer ${
+                activeTab === "media"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-slate-700"
+              }`}
+            >
               Media
             </button>
-            <button className="flex-1 py-3 hover:text-slate-700 transition">
-              Disukai
+            <button
+              onClick={() => setActiveTab("likes")}
+              className={`flex-1 py-3 border-b-2 font-bold transition duration-200 cursor-pointer ${
+                activeTab === "likes"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-slate-700"
+              }`}
+            >
+              Likes
             </button>
           </div>
 
           {/* Daftar Postingan Personal Milik User */}
-          <div className="p-4 columns-1 gap-4">
-            {myThreads.length === 0 ? (
-              <div className="col-span-full">
-                <p className="text-gray-400 text-sm py-12 text-center">
-                  Kamu belum memposting apapun.
-                </p>
-              </div>
-            ) : (
-              myThreads.map((thread) => (
-                <div key={thread.id} className="break-inside-avoid mb-4">
-                  <ThreadCard
-                    thread={thread}
-                    onLikeToggle={toggleLike}
-                    isDetail={false}
-                  />
-                </div>
-              ))
-            )}
-          </div>
+          {activeTab === "posts" && (
+            <ProfilePosts postThreads={myThreads} toggleLike={toggleLike} />
+          )}
+          {activeTab === "media" && (
+            <ProfileMedia mediaThreads={mediaThreads} />
+          )}
+          {activeTab === "likes" && (
+            <ProfileLikes likedThreads={likedThreads} toggleLike={toggleLike} />
+          )}
         </div>
 
         {/* Kolom Kanan */}

@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import api from "../lib/axios";
-import { loginSuccess } from "../redux/authSlice";
+import api from "../../lib/axios";
+import { loginSuccess } from "../../redux/authSlice";
 import { Circle } from "lucide-react";
+import {
+  type LoginForm,
+  loginSchemaForm,
+} from "@/validations/auth-validations";
+import { INITIAL_LOGIN_FORM } from "@/constants/auth-constants";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    validation: "", // Menampung email ATAU username
-    password: "",
-  });
+  const [formData, setFormData] = useState<LoginForm>(INITIAL_LOGIN_FORM);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,6 +24,11 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const validation = loginSchemaForm.safeParse(formData);
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      return;
+    }
     setLoading(true);
 
     try {
@@ -34,7 +41,7 @@ const Login = () => {
       );
       navigate("/home");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login gagal");
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -57,17 +64,17 @@ const Login = () => {
         {/* Tagline Tengah */}
         <div className="my-auto z-10 max-w-sm">
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight">
-            Temukan Lingkaran Pertemanan Baru.
+            Find a New Circle of Friends.
           </h1>
           <p className="mt-4 text-xs text-blue-100/80 leading-relaxed font-medium">
-            Masuk dan jelajahi tren terkini, bagikan ceritamu dengan cepat, dan
-            berinteraksi secara real-time dengan orang-orang di sekitarmu.
+            Log in and explore the latest trends, share your stories quickly,
+            and interact in real-time with people around you.
           </p>
         </div>
 
         {/* Hak Cipta di Bawah */}
         <div className="z-10 text-[10px] text-blue-200/50">
-          © 2026 TalkHive. Semua Hak Dilindungi.
+          © 2026 TalkHive. All Rights Reserved.
         </div>
       </div>
 
@@ -82,11 +89,9 @@ const Login = () => {
                 TALK<span className="text-blue-600">HIVE</span>
               </span>
             </div>
-            <h2 className="text-lg font-bold text-slate-800">
-              Selamat datang kembali!
-            </h2>
+            <h2 className="text-lg font-bold text-slate-800">Welcome back!</h2>
             <p className="text-[11px] text-slate-400 mt-1">
-              Masuk menggunakan username/email kamu untuk melanjutkan.
+              Log in using your username or email to continue.
             </p>
           </div>
 
@@ -99,7 +104,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-700">
-                Username atau Email
+                Username or Email
               </label>
               <input
                 type="text"
@@ -107,7 +112,7 @@ const Login = () => {
                 value={formData.validation}
                 onChange={handleChange}
                 required
-                placeholder="nama@email.com atau username"
+                placeholder="name@email.com or username"
                 className="mt-1.5 block w-full rounded-lg border border-slate-200 px-3 py-2 text-xs bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none transition duration-150"
               />
             </div>
@@ -132,14 +137,14 @@ const Login = () => {
               disabled={loading}
               className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition duration-200 cursor-pointer shadow-sm shadow-blue-200/50"
             >
-              {loading ? "Memproses..." : "Masuk ke Akun"}
+              {loading ? "Processing..." : "Log In"}
             </button>
           </form>
 
           <p className="mt-5 text-center text-xs text-slate-500 font-semibold">
-            Belum punya akun?{" "}
+            Don't have an account?{" "}
             <Link to="/register" className="text-blue-600 hover:underline">
-              Daftar di sini
+              Register here
             </Link>
           </p>
         </div>

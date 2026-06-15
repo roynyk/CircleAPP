@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { HoverUserData } from "@/types/thread";
-import { getAvatarUrl } from "@/lib/utils"; // atau path ke file utility kamu
+import { getAvatarUrl } from "@/lib/utils";
 import { useDispatch } from "react-redux";
 import { toggleSuggestedUserFollow } from "@/redux/authSlice";
 
 interface ProfileHoverCardProps {
   userId: number;
-  children: React.ReactNode; // Trigger-nya (bisa berupa Avatar, Nama, atau Username)
+  children: React.ReactNode;
 }
 
 export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
@@ -31,7 +31,7 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
     if (open && !userData) {
       try {
         setLoading(true);
-        const response = await api.get(`/users/${userId}`); // Menggunakan endpoint baru buatanmu
+        const response = await api.get(`/users/${userId}`);
         setUserData(response.data.data);
       } catch (error) {
         console.error("Gagal mengambil data hover profil:", error);
@@ -43,17 +43,17 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
 
   const handleFollowToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Cegah klik menembus ke thread card
+    e.stopPropagation();
     if (!userData) return;
     try {
       const newFollowStatus = !userData.isFollowed;
 
       if (userData.isFollowed) {
         await api.delete(`/users/unfollow/${userId}`);
-        toast.success(`Batal mengikuti @${userData.username}`);
+        toast.success(`Unfollowed @${userData.username}`);
       } else {
         await api.post(`/users/follow/${userId}`);
-        toast.success(`Berhasil mengikuti @${userData.username}`);
+        toast.success(`Followed @${userData.username}`);
       }
       // 1. Update state lokal Hover Card secara instan
       setUserData((prev) =>
@@ -74,8 +74,8 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
           isFollow: newFollowStatus,
         }),
       );
-    } catch (error) {
-      toast.error("Tidak dapat memfollow diri sendiri");
+    } catch {
+      toast.error("Cannot follow yourself");
     }
   };
 
@@ -122,7 +122,7 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
-                {userData.isFollowed ? "Mengikuti" : "Ikuti"}
+                {userData.isFollowed ? "Following" : "Follow"}
               </Button>
             </div>
 
@@ -155,7 +155,7 @@ export const ProfileHoverCard: React.FC<ProfileHoverCardProps> = ({
           </div>
         ) : (
           <p className="text-xs text-slate-400 text-center">
-            Gagal memuat profil
+            Failed to load profile
           </p>
         )}
       </HoverCardContent>

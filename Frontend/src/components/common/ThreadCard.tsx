@@ -1,8 +1,8 @@
 import React from "react";
 import { ThreadCardProps } from "@/types/thread";
 import { Heart, MessageCircle } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { ProfileHoverCard } from "./ProfileHoverCard";
 import { getAvatarUrl } from "@/lib/utils";
@@ -20,7 +20,7 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
       month: "short",
       year: "numeric",
     };
-    return new Date(dateString).toLocaleDateString("id-ID", options);
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   // Content card body

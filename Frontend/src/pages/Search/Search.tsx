@@ -7,19 +7,12 @@ import { Search as SearchIcon, Sparkles } from "lucide-react";
 import api from "@/lib/axios";
 import { getAvatarUrl } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
-import { ProfileHoverCard } from "@/components/common/ProfileHoverCard"; // <-- Import Hover Card
-
-interface SearchedUser {
-  id: number;
-  username: string;
-  fullName: string;
-  photoProfile: string | null;
-  bio: string | null;
-}
+import { ProfileHoverCard } from "@/components/common/ProfileHoverCard";
+import { SearchedUser } from "@/types/user";
 
 const Search: React.FC = () => {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 500); // Tunggu 500ms setelah user berhenti mengetik
+  const debouncedQuery = useDebounce(query, 500);
 
   const [results, setResults] = useState<SearchedUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +49,7 @@ const Search: React.FC = () => {
         <div className="flex-1 max-w-4xl w-full min-w-0 bg-white rounded-xl shadow-md p-6 text-left min-h-[600px] flex flex-col">
           <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center mb-6">
             <SearchIcon size={22} className="text-blue-500 mr-2" />
-            Cari Pengguna
+            Search Users
           </h1>
 
           {/* Kotak Input Pencarian */}
@@ -67,7 +60,7 @@ const Search: React.FC = () => {
             />
             <Input
               type="text"
-              placeholder="Masukkan nama lengkap atau username..."
+              placeholder="Enter full name or username..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="pl-11 h-12 bg-slate-50 border-slate-100 rounded-xl focus-visible:ring-blue-500 focus-visible:bg-white transition duration-200 text-sm"
@@ -101,8 +94,8 @@ const Search: React.FC = () => {
                 />
                 <p className="text-xs font-medium">
                   {query.trim() === ""
-                    ? "Ketik nama atau username untuk mencari teman baru."
-                    : "Tidak ada pengguna yang cocok."}
+                    ? "Type name or username to find new friends."
+                    : "No matching users found."}
                 </p>
               </div>
             ) : (

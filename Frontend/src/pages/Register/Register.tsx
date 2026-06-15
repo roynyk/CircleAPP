@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import api from "../lib/axios";
-import { loginSuccess } from "../redux/authSlice";
+import api from "@/lib/axios";
+import { loginSuccess } from "@/redux/authSlice";
 import { Circle } from "lucide-react";
+import {
+  type RegisterForm,
+  registerSchemaForm,
+} from "@/validations/auth-validations";
+import { INITIAL_REGISTER_FORM } from "@/constants/auth-constants";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    fullName: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState<RegisterForm>(INITIAL_REGISTER_FORM);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,6 +24,12 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const validation = registerSchemaForm.safeParse(formData);
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      return;
+    }
     setLoading(true);
 
     try {
@@ -37,7 +43,7 @@ const Register = () => {
       );
       navigate("/home");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registrasi gagal");
+      setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -60,17 +66,17 @@ const Register = () => {
         {/* Tagline Tengah */}
         <div className="my-auto z-10 max-w-sm">
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight">
-            Mulai Ceritamu Sekarang.
+            Start Your Story Now.
           </h1>
           <p className="mt-4 text-xs text-blue-100/80 leading-relaxed font-medium">
-            Buat akun barumu sekarang secara gratis, terhubung dengan jutaan
-            pengguna lainnya, dan bagikan momen serumu hari ini.
+            Create your new account now for free, connect with millions of other
+            users, and share your exciting moments today.
           </p>
         </div>
 
         {/* Hak Cipta di Bawah */}
         <div className="z-10 text-[10px] text-blue-200/50">
-          © 2026 TalkHive. Semua Hak Dilindungi.
+          © 2026 TalkHive. All Rights Reserved.
         </div>
       </div>
 
@@ -85,9 +91,11 @@ const Register = () => {
                 TALK<span className="text-blue-600">HIVE</span>
               </span>
             </div>
-            <h2 className="text-lg font-bold text-slate-800">Buat Akun Baru</h2>
+            <h2 className="text-lg font-bold text-slate-800">
+              Create New Account
+            </h2>
             <p className="text-[11px] text-slate-400 mt-1">
-              Daftar gratis untuk mulai membagikan momen-momen terbaikmu.
+              Register for free to start sharing your best moments.
             </p>
           </div>
 
@@ -108,14 +116,14 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
-                placeholder="cth: adit123"
+                placeholder="e.g. adit123"
                 className="mt-1.5 block w-full rounded-lg border border-slate-200 px-3 py-2 text-xs bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none transition duration-150"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700">
-                Nama Lengkap
+                Full Name
               </label>
               <input
                 type="text"
@@ -123,7 +131,7 @@ const Register = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 required
-                placeholder="cth: Adit Muhijriawan"
+                placeholder="e.g. Adit Muhijriawan"
                 className="mt-1.5 block w-full rounded-lg border border-slate-200 px-3 py-2 text-xs bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none transition duration-150"
               />
             </div>
@@ -138,7 +146,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="nama@email.com"
+                placeholder="name@email.com"
                 className="mt-1.5 block w-full rounded-lg border border-slate-200 px-3 py-2 text-xs bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none transition duration-150"
               />
             </div>
@@ -153,7 +161,7 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                placeholder="Minimal 6 karakter"
+                placeholder="At least 6 characters"
                 className="mt-1.5 block w-full rounded-lg border border-slate-200 px-3 py-2 text-xs bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none transition duration-150"
               />
             </div>
@@ -163,14 +171,14 @@ const Register = () => {
               disabled={loading}
               className="w-full rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition duration-200 cursor-pointer shadow-sm shadow-blue-200/50"
             >
-              {loading ? "Memproses..." : "Daftar Akun Baru"}
+              {loading ? "Processing..." : "Register New Account"}
             </button>
           </form>
 
           <p className="mt-5 text-center text-xs text-slate-500 font-semibold">
-            Sudah punya akun?{" "}
+            Already have an account?{" "}
             <Link to="/login" className="text-blue-600 hover:underline">
-              Login di sini
+              Login here
             </Link>
           </p>
         </div>

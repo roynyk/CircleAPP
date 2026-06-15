@@ -1,0 +1,406 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TalkHive API Documentation",
+    "version": "1.0.0",
+    "description": "Dokumentasi interaktif seluruh API untuk aplikasi TalkHive. Gunakan tombol 'Authorize' di kanan atas untuk memasukkan Bearer Token JWT agar bisa mengakses endpoint terproteksi."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Mendaftarkan user baru (Register)",
+        "tags": ["Authentication"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "fullName", "email", "password"],
+                "properties": {
+                  "username": { "type": "string", "example": "joko123" },
+                  "fullName": {
+                    "type": "string",
+                    "example": "Joko Anwar Sukamulyo"
+                  },
+                  "email": { "type": "string", "example": "joko@gmail.com" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User berhasil terdaftar" },
+          "400": { "description": "Username / email sudah terdaftar" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Masuk ke akun (Login)",
+        "tags": ["Authentication"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["validation", "password"],
+                "properties": {
+                  "validation": {
+                    "type": "string",
+                    "example": "joko@gmail.com"
+                  },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login Berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Login Berhasil"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "username": { "type": "string", "example": "joko123" },
+                        "fullName": {
+                          "type": "string",
+                          "example": "Joko Anwar Sukamulyo"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "joko@gmail.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Password salah / user tidak ditemukan" }
+        }
+      }
+    },
+    "/users/user": {
+      "get": {
+        "summary": "Mendapatkan detail profil user yang sedang login saat ini",
+        "tags": ["Users"],
+        "responses": {
+          "200": { "description": "Profil berhasil dimuat" },
+          "401": { "description": "Tidak diizinkan / Token JWT tidak valid" }
+        }
+      }
+    },
+    "/users/update": {
+      "patch": {
+        "summary": "Memperbarui profil user (Nama, Bio, Foto Profil)",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": { "type": "string", "example": "Joko Anwar S" },
+                  "bio": {
+                    "type": "string",
+                    "example": "Belajar Koding Frontend & Backend"
+                  },
+                  "photoProfile": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Unggah file gambar profil baru"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profil berhasil diperbarui" },
+          "401": { "description": "Token JWT tidak valid" }
+        }
+      }
+    },
+    "/users/suggested": {
+      "get": {
+        "summary": "Mendapatkan daftar rekomendasi pengguna untuk diikuti",
+        "tags": ["Users"],
+        "responses": {
+          "200": { "description": "Daftar rekomendasi berhasil dimuat" }
+        }
+      }
+    },
+    "/users/follows": {
+      "get": {
+        "summary": "Mendapatkan daftar followers atau following",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "description": "Pilih 'followers' atau 'following'",
+            "schema": {
+              "type": "string",
+              "enum": ["followers", "following"],
+              "example": "following"
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Daftar koneksi berhasil dimuat" },
+          "400": { "description": "Parameter 'type' tidak valid" }
+        }
+      }
+    },
+    "/users/search": {
+      "get": {
+        "summary": "Mencari pengguna berdasarkan nama lengkap atau username",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Kata kunci pencarian",
+            "schema": { "type": "string", "example": "budi" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Hasil pencarian berhasil dimuat" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Mendapatkan detail profil user lain berdasarkan ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID Pengguna",
+            "schema": { "type": "integer", "example": 3 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Profil user berhasil dimuat" },
+          "404": { "description": "User tidak ditemukan" }
+        }
+      }
+    },
+    "/users/follow/{id}": {
+      "post": {
+        "summary": "Mengikuti (Follow) user lain",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID Pengguna yang ingin diikuti",
+            "schema": { "type": "integer", "example": 4 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil mengikuti pengguna" }
+        }
+      }
+    },
+    "/users/unfollow/{id}": {
+      "delete": {
+        "summary": "Batal mengikuti (Unfollow) user lain",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID Pengguna yang ingin di-unfollow",
+            "schema": { "type": "integer", "example": 4 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil batal mengikuti pengguna" }
+        }
+      }
+    },
+    "/threads": {
+      "get": {
+        "summary": "Mendapatkan daftar seluruh postingan (Threads) global",
+        "tags": ["Threads"],
+        "responses": {
+          "200": { "description": "Daftar threads berhasil dimuat" }
+        }
+      }
+    },
+    "/threads/create": {
+      "post": {
+        "summary": "Membuat postingan (Thread) baru",
+        "tags": ["Threads"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["content"],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "example": "Halo dunia! Ini postingan pertamaku."
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Unggah file gambar opsional"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Thread berhasil dibuat" }
+        }
+      }
+    },
+    "/threads/{id}": {
+      "get": {
+        "summary": "Mendapatkan detail postingan thread beserta daftarnya balasan",
+        "tags": ["Threads"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID Thread",
+            "schema": { "type": "integer", "example": 12 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Detail thread berhasil dimuat" },
+          "404": { "description": "Thread tidak ditemukan" }
+        }
+      }
+    },
+    "/threads/{threadId}/like": {
+      "post": {
+        "summary": "Menyukai (Like) atau Batal menyukai (Unlike) postingan thread",
+        "tags": ["Threads"],
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "description": "ID Thread",
+            "schema": { "type": "integer", "example": 12 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Status like berhasil di-toggle" }
+        }
+      }
+    },
+    "/threads/{threadId}/reply": {
+      "post": {
+        "summary": "Membuat balasan (Reply) pada suatu postingan thread",
+        "tags": ["Threads"],
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "description": "ID Thread yang ingin dibalas",
+            "schema": { "type": "integer", "example": 12 }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["content"],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "example": "Saya setuju dengan postingan ini!"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Unggah gambar balasan opsional"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Balasan berhasil dibuat" }
+        }
+      }
+    },
+    "/threads/{id}/replies": {
+      "get": {
+        "summary": "Mendapatkan daftar balasan untuk suatu thread tertentu",
+        "tags": ["Threads"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID Thread",
+            "schema": { "type": "integer", "example": 12 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Daftar balasan berhasil dimuat" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
 
     if (file) {
       if (!file.type.startsWith("image/")) {
-        alert("Hanya diperbolehkan mengunggah file gambar.");
+        alert("Only image files are allowed.");
         return;
       }
       setSelectedImage(file);
@@ -56,7 +56,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
     >
       {/* Textarea Input Balasan */}
       <Textarea
-        placeholder="Tulis balasanmu..."
+        placeholder="Write your reply..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="resize-none border-gray-200 focus:border-blue-400 focus:ring-blue-400 bg-white text-sm"
@@ -90,7 +90,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
             className="flex items-center space-x-1.5 text-blue-600 hover:text-blue-700 cursor-pointer p-1.5 hover:bg-blue-100/50 rounded-lg transition"
           >
             <Image size={18} />
-            <span className="text-[11px] font-semibold">Tambah Gambar</span>
+            <span className="text-[11px] font-semibold">Add Image</span>
           </label>
           <input
             id="reply-image-input"
@@ -107,7 +107,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onSubmit, isSubmitting }) => {
           disabled={isSubmitting || (!content.trim() && !selectedImage)}
           className="h-10 w-10 rounded-xl flex items-center justify-center p-0 cursor-pointer"
         >
-          {isSubmitting ? "Mengirim..." : <Send size={16} />}
+          {isSubmitting ? "Sending..." : <Send size={16} />}
         </Button>
       </div>
     </form>

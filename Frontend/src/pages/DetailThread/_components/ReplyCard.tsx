@@ -14,7 +14,7 @@ const ReplyCard: React.FC<ReplyCardProps> = ({ reply }) => {
       day: "numeric",
       month: "short",
     };
-    return new Date(dateString).toLocaleDateString("id-ID", options);
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   return (

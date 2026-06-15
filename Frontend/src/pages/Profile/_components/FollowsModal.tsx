@@ -67,7 +67,7 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
         {/* Header Modal */}
         <DialogHeader className="p-4 border-b border-slate-100 flex-shrink-0">
           <DialogTitle className="text-sm font-bold text-slate-800">
-            Daftar Koneksi
+            Connections
           </DialogTitle>
         </DialogHeader>
 
@@ -81,7 +81,7 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
                 : "border-transparent hover:text-slate-700"
             }`}
           >
-            Mengikuti (Following)
+            Following
           </button>
           <button
             onClick={() => setActiveTab("followers")}
@@ -91,7 +91,7 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
                 : "border-transparent hover:text-slate-700"
             }`}
           >
-            Pengikut (Followers)
+            Followers
           </button>
         </div>
 
@@ -116,8 +116,8 @@ export const FollowsModal: React.FC<FollowsModalProps> = ({
             <div className="h-full flex flex-col items-center justify-center text-slate-400 py-16">
               <p className="text-xs font-medium">
                 {activeTab === "followers"
-                  ? "Belum ada yang mengikuti kamu."
-                  : "Kamu belum mengikuti siapa pun."}
+                  ? "No one is following you yet."
+                  : "You are not following anyone yet."}
               </p>
             </div>
           ) : (

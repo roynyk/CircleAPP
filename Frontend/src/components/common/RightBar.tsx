@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserPlus, Sparkles } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { getAvatarUrl } from "@/lib/utils";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -58,7 +58,7 @@ const RightBar: React.FC = () => {
       dispatch(
         toggleSuggestedUserFollow({ targetId, isFollow: !isCurrentlyFollowed }),
       );
-    } catch (error) {
+    } catch {
       toast.error(
         isCurrentlyFollowed
           ? "Gagal batal mengikuti"
@@ -75,9 +75,7 @@ const RightBar: React.FC = () => {
         <div className="flex items-center justify-between text-slate-800 border-b border-slate-100/80 pb-3">
           <div className="flex items-center space-x-2">
             <UserPlus size={18} className="text-blue-500" />
-            <h2 className="font-bold text-sm tracking-wide">
-              Siapa untuk Diikuti
-            </h2>
+            <h2 className="font-bold text-sm tracking-wide">Who to Follow</h2>
           </div>
           <Sparkles size={14} className="text-amber-500 animate-pulse" />
         </div>
@@ -102,7 +100,7 @@ const RightBar: React.FC = () => {
           </div>
         ) : suggestedUsers.length === 0 ? (
           <p className="text-xs text-slate-400 text-center py-4">
-            Tidak ada rekomendasi baru saat ini.
+            No recommendations at this time.
           </p>
         ) : (
           <div className="space-y-3">
@@ -148,7 +146,7 @@ const RightBar: React.FC = () => {
                       : "border-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white hover:border-blue-600"
                   }`}
                 >
-                  {user.isFollowed ? "Mengikuti" : "Ikuti"}
+                  {user.isFollowed ? "Following" : "Follow"}
                 </Button>
               </div>
             ))}
@@ -175,7 +173,7 @@ const RightBar: React.FC = () => {
           </a>
           <span>|</span>
           <a href="#" className="hover:underline">
-            Ads info
+            Ads Info
           </a>
           <span>|</span>
           <a href="#" className="hover:underline">

@@ -14,7 +14,6 @@ import { getAvatarUrl } from "@/lib/utils";
 
 const Home = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  // 2. Gunakan Custom Hook untuk memuat seluruh state dan aksi
   const { threads, loading, error, isPosting, createThread, toggleLike } =
     useThreads();
 
@@ -29,7 +28,7 @@ const Home = () => {
     if (file) {
       // Validasi tipe file agar hanya gambar
       if (!file.type.startsWith("image/")) {
-        alert("Hanya diperbolehkan mengunggah file gambar.");
+        alert("Only image files are allowed.");
         return;
       }
       setSelectedImage(file);
@@ -77,7 +76,7 @@ const Home = () => {
               className="flex-1 min-w-0 w-full space-y-3"
             >
               <Textarea
-                placeholder="Apa yang sedang kamu pikirkan hari ini?"
+                placeholder="What is on your mind today?"
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
                 className="resize-none border-gray-200 focus:border-blue-400 focus:ring-blue-400"
@@ -88,7 +87,7 @@ const Home = () => {
                 <div className="relative mt-2 rounded-xl overflow-hidden max-h-60 border border-gray-200 bg-gray-50 flex items-center justify-center">
                   <img
                     src={imagePreview}
-                    alt="Preview unggahan"
+                    alt="Preview"
                     className="max-h-60 object-contain w-full"
                   />
                   <button
@@ -108,9 +107,7 @@ const Home = () => {
                     className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 cursor-pointer p-2 hover:bg-blue-50 rounded-lg transition"
                   >
                     <Image size={20} />
-                    <span className="text-xs font-semibold">
-                      Tambahkan Gambar
-                    </span>
+                    <span className="text-xs font-semibold">Add Image</span>
                   </label>
                   <input
                     id="image-input"
@@ -123,13 +120,13 @@ const Home = () => {
 
                 <Button
                   type="submit"
-                  onClick={() => toast.success("Thread has been created")}
+                  onClick={() => toast.success("Post created successfully")}
                   disabled={
                     isPosting || (!newPostContent.trim() && !selectedImage)
                   }
                   className="cursor-pointer"
                 >
-                  {isPosting ? "Memposting..." : "Post"}
+                  {isPosting ? "Posting..." : "Post"}
                 </Button>
               </div>
             </form>
@@ -137,14 +134,12 @@ const Home = () => {
           {/* Daftar Feed Postingan */}
 
           {loading ? (
-            <p className="p-6 text-center text-gray-500">
-              Sedang memuat postingan...
-            </p>
+            <p className="p-6 text-center text-gray-500">Loading posts...</p>
           ) : error ? (
             <p className="p-6 text-center text-red-500">{error}</p>
           ) : threads.length === 0 ? (
             <p className="p-6 text-center text-gray-500">
-              Belum ada postingan saat ini. Jadilah yang pertama memposting!
+              No posts at the moment. Be the first to post!
             </p>
           ) : (
             <div className="columns-1 sm:columns-2 gap-4">

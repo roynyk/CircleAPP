@@ -57,7 +57,7 @@ export const useThreads = () => {
           toast.info("Thread Baru!", {
             classNames: { toast: "bg-black-600", title: "text-white-400" },
             description: `${newThread.user.name} (@${newThread.user.username}) memposting thread baru.`,
-            duration: 5000, // Tayang selama 5 detik
+            duration: 5000,
           });
           dispatch(addThread(newThread));
         }

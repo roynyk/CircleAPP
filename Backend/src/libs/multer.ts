@@ -1,18 +1,24 @@
 import multer from "multer";
 import path from "path";
 
+//#region
 // aslinya mah express tidak bisa menghandle data dalam bentuk file, makanya kita butuh multer, nah aslinya juga yang kesimpan di dalam database itu bukan file upload nya tapi nama nya aja yang udh kita rancang di bawah ini, kalau file aslinya tersimpan di dalam destination: (req, file, callback) => {callback(null, "public/uploads"); },
+//#endregion
 
 const storage = multer.diskStorage({
   // ini destinasinya bakal di mana file nya di upload
   destination: (req, file, callback) => {
     callback(null, "public/uploads");
   },
-  //   ini untuk file name nya, yang uniqueSuffix itu di buat supaya kalau misalnya ada nama file upload yang sama tetap bisa di bedakan, lalu path.extname(file.originalname) untuk mengambil path asli file nya, kaya .jpg .png or something
+  //#region
+  //ini untuk file name nya, yang uniqueSuffix itu di buat supaya kalau misalnya ada nama file upload yang sama tetap bisa di bedakan, lalu path.extname(file.originalname) untuk mengambil path asli file nya, kaya .jpg .png or something
+  //#endregion
   filename(req, file, callback) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e5);
 
+    //#region
     // file.fieldname ini untuk mengambil nama field kita karena di dalam route yang kita gunakan itu kan memanggil multer dengan upload.single("image"), nah nama fieldnya berarti image, maka file.fieldname itu image isinya, nah untuk yang path.extname(file.originalname) itu untuk mengambil path extension name filenya kaya misalnya .png atau .jpg
+    //#endregion
     callback(
       null,
       file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),

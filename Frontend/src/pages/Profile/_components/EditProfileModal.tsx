@@ -53,7 +53,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        toast.error("Hanya file gambar yang diperbolehkan");
+        toast.error("Only image files are allowed");
         return;
       }
       setSelectedFile(file);
@@ -64,7 +64,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
-      toast.error("Nama lengkap tidak boleh kosong");
+      toast.error("Full name cannot be empty");
       return;
     }
 
@@ -87,11 +87,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       // Update data di Redux & LocalStorage
       dispatch(setProfile(response.data.data));
 
-      toast.success("Profil berhasil diperbarui!");
+      toast.success("Profile updated successfully!");
       onClose(); // Tutup modal setelah sukses
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Gagal memperbarui profil");
+      toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
@@ -105,7 +105,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             Edit Profile
           </DialogTitle>
           <DialogDescription className="text-xs text-slate-400">
-            Perbarui nama lengkap, bio, atau foto profil akunmu di bawah ini.
+            Update your full name, bio, or profile picture below.
           </DialogDescription>
         </DialogHeader>
 
@@ -145,9 +145,9 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-700">Foto Profil</p>
+              <p className="text-xs font-bold text-slate-700">Profile Picture</p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                Klik avatar untuk mengganti gambar.
+                Click avatar to change image.
               </p>
             </div>
           </div>
@@ -155,13 +155,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           {/* Input Nama Lengkap */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700">
-              Nama Lengkap
+              Full Name
             </label>
             <Input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Nama lengkap"
+              placeholder="Full name"
               className="border-gray-200 focus:border-blue-400 focus:ring-blue-400 h-9 bg-white text-xs"
             />
           </div>
@@ -172,7 +172,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <Textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Tulis bio singkat..."
+              placeholder="Write a short bio..."
               className="break-word resize-none border-gray-200 focus:border-blue-400 focus:ring-blue-400 bg-white text-xs"
               rows={3}
             />
@@ -187,14 +187,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               disabled={isSaving}
               className="h-9 text-xs rounded-lg cursor-pointer"
             >
-              Batal
+              Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSaving}
               className="h-9 text-xs rounded-lg cursor-pointer"
             >
-              {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

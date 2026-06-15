@@ -4,8 +4,8 @@ import Header from "@/components/common/Header";
 import RightBar from "@/components/common/RightBar";
 import ThreadCard from "@/components/common/ThreadCard";
 import { ArrowLeft } from "lucide-react";
-import ReplyForm from "@/components/common/ReplyForm";
-import ReplyCard from "@/components/common/ReplyCard";
+import ReplyForm from "./_components/ReplyForm";
+import ReplyCard from "./_components/ReplyCard";
 import { useThreadDetail } from "@/hooks/useThreadDetail"; // <-- Import hook baru
 
 const DetailThread: React.FC = () => {
@@ -35,18 +35,18 @@ const DetailThread: React.FC = () => {
             className="flex items-center space-x-2 text-gray-500 hover:text-slate-800 mb-6 transition cursor-pointer"
           >
             <ArrowLeft size={18} />
-            <span className="text-sm font-semibold">Kembali ke Feed</span>
+            <span className="text-sm font-semibold">Back to Home</span>
           </button>
 
           {loading ? (
             <p className="text-center text-gray-500 py-10 text-sm">
-              Memuat detail postingan...
+              Loading post details...
             </p>
           ) : error ? (
             <p className="text-center text-red-500 py-10 text-sm">{error}</p>
           ) : !thread ? (
             <p className="text-center text-gray-500 py-10 text-sm">
-              Thread tidak ditemukan.
+              Thread not found.
             </p>
           ) : (
             <div>
@@ -66,12 +66,12 @@ const DetailThread: React.FC = () => {
               {/* Daftar Balasan */}
               <div className="mt-8 space-y-4">
                 <h3 className="font-bold text-gray-800 text-sm border-l-4 border-blue-500 pl-2">
-                  Balasan ({replies.length})
+                  Replies ({replies.length})
                 </h3>
 
                 {replies.length === 0 ? (
                   <p className="text-gray-400 text-xs py-6 text-center">
-                    Belum ada balasan pada postingan ini.
+                    No replies on this post yet.
                   </p>
                 ) : (
                   <div className="divide-y divide-gray-100">
