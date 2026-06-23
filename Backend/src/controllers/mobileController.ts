@@ -89,11 +89,11 @@ export const getMetriksHome = async (req: Request, res: Response) => {
       where: { followingId: userId },
     });
     const week1Followers = await prisma.follow.count({
-      where: { followerId: userId, createdAt: { gte: sevenDaysAgo } },
+      where: { followingId: userId, createdAt: { gte: sevenDaysAgo } },
     });
     const week2Followers = await prisma.follow.count({
       where: {
-        followerId: userId,
+        followingId: userId,
         createdAt: {
           gte: fourteenDaysAgo,
           lt: sevenDaysAgo,
