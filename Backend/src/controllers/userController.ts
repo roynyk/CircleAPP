@@ -209,7 +209,6 @@ export const getFollows = async (req: Request, res: Response) => {
   }
 };
 
-// 5. Melakukan Follow ke User Lain
 export const followUser = async (req: Request, res: Response) => {
   try {
     const followerId = (req as any).user.id; // ID kita sendiri yang sedang login
@@ -240,7 +239,6 @@ export const followUser = async (req: Request, res: Response) => {
   }
 };
 
-// 6. Melakukan Unfollow (Batal Follow)
 export const unfollowUser = async (req: Request, res: Response) => {
   try {
     const followerId = (req as any).user.id;
